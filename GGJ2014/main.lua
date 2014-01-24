@@ -1,5 +1,5 @@
 local storyboard = require("storyboard")
 
 --  run first menu
-storyboard.gotoScene( "TODO", "fade", 0)
+storyboard.gotoScene( "src.scene.sceneGame", "fade", 0)
 
