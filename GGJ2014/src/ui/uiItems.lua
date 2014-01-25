@@ -143,4 +143,22 @@ function class.newVerticalSlider(pos, size, fullfilmentName, value, valueMax)
     return T
 end
 
+function class.newFlotingText(text, isBad) 
+    local T = display.newGroup()
+    
+    local text = display.newText(text, 0, display.contentHeight/4, native.systemFont, 30)
+    local back = display.newRect(0, display.contentHeight/4, text.contentWidth, text.contentHeight)
+    if(isBad) then
+        back.fill = {1, 0.2, 0.2}
+    else
+        back.fill = {0.2, 1, 0.2}
+    end
+    T:insert(back)
+    T:insert(text)
+    
+    T.x = -text.contentWidth/2
+    
+    transition.to(T, {time = 3000, x=320 + text.contentWidth/2, onComplete=text.removeSelf})
+end
+
 return class

@@ -8,7 +8,7 @@ function class.createDrug(direction, pos)
     drug.name = "drug"
     --print("drug ") 
     --print(physics.addBody(drug))
-    physics.addBody(drug)
+    physics.addBody(drug, "dynamic", {filter={ categoryBits = 1, maskBits = 2 }})
     
     transition.to(drug, {time=5000, rotation=3600, x=pos[1] + 1000*direction, y=pos[2]-600, 
         onComplete = drug.destroy})

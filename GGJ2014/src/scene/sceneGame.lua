@@ -7,9 +7,13 @@ local gui = require("src.ui.uiItems")
 
 local roadFactory = require("src.unit.unitRoadFactory")
 local candymanFactory = require("src.unit.unitCandymanFactory")
+local obstacleFactory = require("src.unit.unitObstacleFactory")
 
+print("physics.start")
 local physics = require( "physics" )
-physics.setDrawMode( "hybrid" )
+--physics.setDrawMode( "hybrid" )
+physics.start()
+physics.setGravity(0, 0)
 
 local logicCollisions = require("src.logic.logicCollisions")
 
@@ -23,6 +27,7 @@ local updatedMenu = nil
 
 -- timers
 local candymanTimers = nil
+local obstacleTimers = nil
 
 ---------------------------------------------------
 --   LOCALS         
@@ -57,7 +62,7 @@ end
 
 local function onEnterScene( event )
     scene:updateUI()
-    
+    globalParams.updateSkillTime(event.time)
     character:move(event.time)
 end
 
@@ -77,7 +82,7 @@ end
 
 -----------------------
 function scene:createScene( event )
-    
+
     -- scene group
     screenGroup = display.newGroup()
     
@@ -101,8 +106,11 @@ end
 
 function scene:createTimers()
     candymanTimers = timer.performWithDelay(globalParams.verticalSpeed, scene.createCandyman)
-
-    physics.start()
+    
+    obstacleTimers = timer.performWithDelay(globalParams.verticalSpeed/2, scene.createObstacle)
+    
+    --print("physics.start")
+    --physics.start()
 end
 
 function scene.createCandyman()
@@ -111,6 +119,14 @@ function scene.createCandyman()
         screenGroup:insert(candyman)
     end
     candymanTimers = timer.performWithDelay(globalParams.verticalSpeed, scene.createCandyman)
+end
+
+function scene.createObstacle()
+    local obstacle = obstacleFactory.getRandomObstacle()
+    if obstacle then
+        screenGroup:insert(obstacle)
+    end
+    obstacleTimers = timer.performWithDelay(globalParams.verticalSpeed/2, scene.createObstacle)
 end
 
 function scene:updateUI()
@@ -155,10 +171,47 @@ function scene:updateUI()
         "gfx/slider_background.jpg", "gfx/indicator.jpg", globalParams.badLevel)
     updatedMenu:insert(badLevelBar)
     
-    local pointsText = gui.newSimpleText({10, 40}, 25, "Pts: " .. globalParams.points)
+    local pointsText = gui.newSimpleText({10, 40}, 25, globalParams.points .. "$")
     updatedMenu:insert(pointsText)
-    local pointsText = gui.newSimpleText({10, 60}, 25, "Dist: " .. globalParams.distance)
+    local pointsText = gui.newSimpleText({10, 60}, 25, globalParams.distance .. "m")
     updatedMenu:insert(pointsText)
+    
+    local iconSize = 20
+    local pointsGfx = nil
+    if(globalParams.pointsModif == 2) then
+        pointsGfx = "gfx/good_$.jpg"
+    elseif(globalParams.pointsModif == 0.5) then
+        pointsGfx = "gfx/bad_$.jpg"
+    else
+        pointsGfx = "gfx/back.jpg"
+    end
+    local goldModifIcon = gui.newImageRect(pointsGfx, 
+        {display.contentWidth-iconSize, display.contentCenterY}, {iconSize, iconSize})
+    updatedMenu:insert(pointsText)
+    
+    local dmgGfx = nil
+    if(globalParams.dmgModif == 0.5) then
+        dmgGfx = "gfx/good_def.jpg"
+    elseif(globalParams.dmgModif == 2) then
+        dmgGfx = "gfx/bad_def.jpg"
+    else
+        dmgGfx = "gfx/back.jpg"
+    end
+    local dmgModifIcon = gui.newImageRect(dmgGfx, 
+        {display.contentWidth-iconSize, display.contentCenterY + iconSize}, {iconSize, iconSize})
+    updatedMenu:insert(dmgModifIcon)
+    
+    local steringGfx = nil
+    if(globalParams.steringModifType == 1) then
+        steringGfx = "gfx/good_ster.jpg"
+    elseif(globalParams.steringModifType == -1) then
+        steringGfx = "gfx/bad_ster.jpg"
+    else
+        steringGfx = "gfx/back.jpg"
+    end
+    local steringModifIcon = gui.newImageRect(steringGfx, 
+        {display.contentWidth-iconSize, display.contentCenterY+iconSize*2}, {iconSize, iconSize})
+    updatedMenu:insert(steringModifIcon)
     
     screenGroup:insert(updatedMenu)
 end
