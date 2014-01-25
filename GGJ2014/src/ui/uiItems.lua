@@ -19,25 +19,40 @@ end
 -- @param valueMax
 -- @return
 
-function class.newHorizontalSlider(pos, size, fullfilmentName, value, valueMax) 
-    
+function class.newHorizontalSlider(pos, size, backgroundName, fullfilmentName, value, valueMax) 
+    local boarderSize = 4
     local T = display.newGroup()
     
-    local back = class.newImageRect("gfx/ui/horizontal_slider_background.png", {x=pos.x - 1, y=pos.y - 1} , {w=size.w + 2, h=size.h + 2})
-    back.fill = {0.6, 0.6, 0.6}
+    local back = class.newImageRect(backgroundName, {pos[1] - boarderSize/2, pos[2] - boarderSize/2} , {size[1] + boarderSize, size[2] + boarderSize})
+    back.anchorX = 0
+    back.anchorY = 0
     T:insert(back)
     
     local width
     if(valueMax ~= -1) then
-        width = value/(valueMax + 1) * size.w + 1
-        if(width > size.w) then
-            width = size.w
+        width = value/(valueMax + 1) * size[1] + 1
+        if(width > size[1]) then
+            width = size[1]
         end
     else
-        width = size.w
+        width = size[1]
     end
-    local fill = class.newImageRect(fullfilmentName, pos, {w=width, h=size.h})
+    local fill = class.newImageRect(fullfilmentName, pos, {width, size[2]})
+    fill.anchorX = 0
+    fill.anchorY = 0
     T:insert(fill)
+    
+    return T
+end
+
+function class.newSimpleText(pos, size, text)
+    local T = display.newGroup()
+    
+    local text = display.newText(text, pos[1], pos[2], native.systemFont, size)
+    text.anchorX = 0
+    text.anchorY = 0
+    
+    T:insert(text)
     
     return T
 end
@@ -130,101 +145,6 @@ function class.newVerticalSlider(pos, size, fullfilmentName, value, valueMax)
     T:insert(fill)
     
     return T
-end
-
----
--- @param pos
--- @param size
--- @param skillType
--- @param level
--- @return
-
-function class.newSpecialButton(pos, size, skillType, usableNr, level, isOthersEventUse)
-    local T = display.newGroup()
-    
-    function T.buttonTouch(event)
-        if(event.phase == "began") then
-            if(class.useSpecial(skillType)) then
-                level.skillUp = skillType
-                class.createSkillDragItem(skillType, event)
-            end
-        end
-        
-        if(event.phase == "ended") then
-            level.skillUp = nil
-        end
-    end
-    
-    local btn = class.newImageRect("gfx/ui/special_button.png", pos, size)
-    btn.fill = {0.8,0.8,0.8}
-    if(isOthersEventUse == false) then
-        btn:addEventListener("touch", T.buttonTouch)
-    end
-    T:insert(btn)
-    
-    local text = display.newText(skillType, pos.x, pos.y, size.w, size.h, native.systemFont, 20)
-    text:setFillColor(0.2,0.2,0.2)
-    T:insert(text)
-    
-    local usableNrText = display.newText(usableNr, pos.x + 20, pos.y + size.h/2, native.systemFont, 15)
-    usableNrText:setFillColor(0.2,0.2,0.2)
-    T:insert(usableNrText)
-    
-    return T
-end
-
-function class.useSpecial(skillType) 
-    if(skillType == "line") then
-        if(Game.internalStore.line > 0) then
-            Game.internalStore.line = Game.internalStore.line - 1
-            return true
-        end
-    elseif(skillType == "reset") then
-        if(Game.internalStore.reset > 0) then
-            Game.internalStore.reset = Game.internalStore.reset - 1
-            return true
-        end
-    elseif(skillType == "matrix") then
-        if(Game.internalStore.bomb > 0) then
-            Game.internalStore.bomb = Game.internalStore.bomb - 1
-            return true
-        end
-    elseif(skillType == "color") then
-        if(Game.internalStore.clear > 0) then
-            Game.internalStore.clear = Game.internalStore.clear - 1
-            return true
-        end
-    end
-    
-    return false
-end
-
-function class.removeSelf(event)
-    if(event.phase == "moved") then
-        event.target.x = event.x
-        event.target.y = event.y
-        return true
-    end
-    
-    if(event.phase == "ended") then
-        --display.getCurrentStage():setFocus(nil)
-        --event.target.parent:dispatchEvent(event)
-        event.target:removeSelf()
-        event.target = nil
-        return false
-    end
-end
-
-function class.createSkillDragItem(skillType, event)
-    -- TODO w zaleznosci od "skillType" moze dac inny obrazek ktory bedziemy przeciagac 
-    local dragItem = class.newImageRect("gfx/ui/drag_element.png", {x=event.x, y=event.y}, {w=40, h=40})
-    dragItem.anchorX = 0.5
-    dragItem.anchorY = 0.5
-    dragItem.x = event.x
-    dragItem.y = event.y
-    dragItem.fill = {1, 0.05, 0.05}
-    dragItem:addEventListener("touch", class.removeSelf)
-    --display.getCurrentStage():setFocus(dragItem)
 end
 
 return class
