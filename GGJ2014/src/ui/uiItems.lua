@@ -19,7 +19,7 @@ end
 -- @param valueMax
 -- @return
 
-function class.newHorizontalSlider(pos, size, backgroundName, fullfilmentName, value, valueMax) 
+function class.newHorizontalSliderFill(pos, size, backgroundName, fullfilmentName, value, valueMax) 
     local boarderSize = 4
     local T = display.newGroup()
     
@@ -45,6 +45,22 @@ function class.newHorizontalSlider(pos, size, backgroundName, fullfilmentName, v
     return T
 end
 
+function class.newHorizontalSliderIndicator(pos, size, backgroundName, indicatorName, percent) 
+    local T = display.newGroup()
+    
+    local back = class.newImageRect(backgroundName, pos, size)
+    back.anchorX = 0
+    back.anchorY = 0
+    T:insert(back)
+    
+    local width = (size[1] - size[2]) * percent
+    
+    local fill = class.newImageRect(indicatorName, {pos[1] + size[2]/2 + width, pos[2] + size[2]/2}, {size[2], size[2]})
+    T:insert(fill)
+    
+    return T
+end
+
 function class.newSimpleText(pos, size, text)
     local T = display.newGroup()
     
@@ -57,7 +73,7 @@ function class.newSimpleText(pos, size, text)
     return T
 end
 
-function class.newSimpleButton(pos, size, imgName, onTap)
+function class.newSimpleButton(pos, size, imgName, onTap, onTouch)
     local T = display.newGroup()
     --T.anchorChildren = true
     
@@ -67,52 +83,32 @@ function class.newSimpleButton(pos, size, imgName, onTap)
         btn:addEventListener("tap", onTap)
     end
     
+    if(onTouch ~= nil) then
+        btn:addEventListener("touch", onTouch)
+    end
+    
     T.btn = btn
     T:insert(btn)
     
     return T
 end
 
-function class.newSimpleTextButton(pos, size, text, onTap)
+function class.newSimpleTextButton(pos, size, text, fontSize, onTap)
     local T = display.newGroup()
     --T.anchorChildren = true
     
-    local btn = class.newImageRect("gfx/ui/button_background.png", pos, size)
+    local btn = class.newImageRect("gfx/slider_background.jpg", pos, size)
     
     if(onTap ~= nil) then
         btn:addEventListener("tap", onTap)
     end
-    
-    if(onTouch ~= nil) then
-        btn:addEventListener("touch", onTouch)
-    end
     T.btn = btn
     T:insert(btn)
     
-    local textUi = display.newText(text, pos.x, pos.y, native.systemFont, size.h/3)--20)
+    local textUi = display.newText(text, pos[1], pos[2], native.systemFont, fontSize)--20)
     textUi.fill = {0.2,0.2,0.2}
     T.text = textUi
     T:insert(textUi)
-    
-    ---
-    -- @param r @class number
-    -- @param g @class number
-    -- @param b @class number
-    -- @param a @class number @optional
-    -- @return
-    --
-    function T.fill(r, g, b, a)
-        local a = a or 1
-        T.btn.fill  = {r, g, b, a}
-    end
-    
-    function T.setTextColor(r, g, b, a)
-        local a = a or 1
-        local r = r or 0
-        local g = g or 0
-        local b = b or 0
-        T.text:setFillColor(r, g, b, a)
-    end
     
     return T
 end

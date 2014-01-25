@@ -4,40 +4,71 @@
 local globalParams = require("src.data.dataGlobalParams")
 local storyboard = require( "storyboard" )
 local gui = require("src.ui.uiItems")
+
 local roadFactory = require("src.unit.unitRoadFactory")
+local candymanFactory = require("src.unit.unitCandymanFactory")
+
+local physics = require( "physics" )
+physics.setDrawMode( "hybrid" )
+
+local logicCollisions = require("src.logic.logicCollisions")
 
 local scene = storyboard.newScene()
 local screenGroup
 
 scene.data = {}
-scene.onListener = nil
 
 local character = require("src.unit.unitCharacter")
 local updatedMenu = nil
 
----------------------------------------------------
---   LOCALS
----------------------------------------------------
+-- timers
+local candymanTimers = nil
 
----------- KILL THE POPUP
+---------------------------------------------------
+--   LOCALS         
+---------------------------------------------------
 local function onLeftClick( event )
-    character:moveLeft()
+    if(event.phase == "began") then
+        character:setMove(-1)
+    elseif(event.phase == "ended" or event.phase == "cancelled") then
+        character:setMove(0)
+    end
+    
+    --character:moveLeft()
 end
 
 local function onRightClick( event )
-    character:moveRight()
+    if(event.phase == "began") then
+        character:setMove(1)
+    elseif(event.phase == "ended" or event.phase == "cancelled") then
+        character:setMove(0)
+    end
+    
+    --character:moveRight()
 end
 
 local function onThrowLeftClick( event )
-    character:throw(-1)
+    character:throw(-1, screenGroup)
 end
 
 local function onThrowRightClick( event )
-    character:throw(1)
+    character:throw(1, screenGroup)
 end
 
-local function enterScene()
+local function onEnterScene( event )
     scene:updateUI()
+    
+    character:move(event.time)
+end
+
+local function onCollision(event)
+    logicCollisions.collision(event)
+end
+
+local function onUpTouch(event)
+    if(event.phase == "ended" or event.phase == "cancelled") then
+        character:setMove(0)
+    end
 end
 
 ---------------------------------------------------
@@ -58,54 +89,76 @@ function scene:createScene( event )
     local road2 = roadFactory.createRoad({0, 0})
     screenGroup:insert(road2)
     
+-- PLAYER
+    screenGroup:insert(character)
+    
+-- GUI
+    scene:updateUI()
+
+-- timers
+    scene:createTimers()
+end
+
+function scene:createTimers()
+    candymanTimers = timer.performWithDelay(globalParams.verticalSpeed, scene.createCandyman)
+
+    physics.start()
+end
+
+function scene.createCandyman()
+    local candyman = candymanFactory.getRandomCandyman()
+    if candyman then
+        screenGroup:insert(candyman)
+    end
+    candymanTimers = timer.performWithDelay(globalParams.verticalSpeed, scene.createCandyman)
+end
+
+function scene:updateUI()
+    if updatedMenu ~= nil then
+        updatedMenu:removeSelf()
+    end
+   
+    updatedMenu = display.newGroup()
+    updatedMenu:toFront()
+    
+    -- NEED TO UPDATE GUI
+    updatedMenu = display.newGroup()
+    
     local buttonSize = {60, 60}
     -- gui
     local guiAlpha = 0.7
     local leftButton = gui.newSimpleButton({buttonSize[1]/2, display.contentHeight-buttonSize[2]/2},
-        buttonSize, "gfx/arrow_left.jpg", onLeftClick)
+        buttonSize, "gfx/arrow_left.jpg", nil, onLeftClick)
     leftButton.alpha = guiAlpha
-    screenGroup:insert(leftButton)
+    updatedMenu:insert(leftButton)
     
     local rightButton = gui.newSimpleButton({display.contentWidth-buttonSize[1]/2, display.contentHeight-buttonSize[2]/2},
-        buttonSize, "gfx/arrow_right.jpg", onRightClick)
+        buttonSize, "gfx/arrow_right.jpg", nil, onRightClick)
     rightButton.alpha = guiAlpha
-    screenGroup:insert(rightButton)
+    updatedMenu:insert(rightButton)
     
     local throwLeftButton = gui.newSimpleButton({display.contentCenterX-buttonSize[1], display.contentHeight-buttonSize[2]/2},
         buttonSize, "gfx/throw_button.jpg", onThrowLeftClick)
     throwLeftButton.alpha = guiAlpha
-    screenGroup:insert(throwLeftButton)
+    updatedMenu:insert(throwLeftButton)
     
     local throwRightButton = gui.newSimpleButton({display.contentCenterX+buttonSize[1], display.contentHeight-buttonSize[2]/2},
         buttonSize, "gfx/throw_button.jpg", onThrowRightClick)
     throwRightButton.alpha = guiAlpha
-    screenGroup:insert(throwRightButton)
+    updatedMenu:insert(throwRightButton)
     
-    screenGroup:insert(character)
-    
--- NEED TO UPDATE GUI
-    updatedMenu = display.newGroup()
-    
-    local lifeBar = gui.newHorizontalSlider({display.contentCenterX, 10}, {display.contentCenterX, 30}, 
-            "gfx/slider_background.jpg", "gfx/slider_fill.jpg", character.life, globalParams.maxLife)
-    lifeBar.anchorX = 0
-    lifeBar.anchorY = 0
+    local lifeBar = gui.newHorizontalSliderFill({display.contentCenterX + 10, 10}, {display.contentCenterX-20, 30}, 
+            "gfx/slider_background.jpg", "gfx/slider_fill.jpg", globalParams.life, globalParams.maxLife)
     updatedMenu:insert(lifeBar)
     
-    local pointsText = gui.newSimpleText({0, 0}, 30, "Pts: " .. character.points)
-    local pointsText = gui.newSimpleText({0, 35}, 30, "Dist: " .. character.distance)
+    local badLevelBar = gui.newHorizontalSliderIndicator({10, 10}, {display.contentCenterX-20, 30}, 
+        "gfx/slider_background.jpg", "gfx/indicator.jpg", globalParams.badLevel)
+    updatedMenu:insert(badLevelBar)
     
-    screenGroup:insert(updatedMenu)
-end
-
-function scene:updateUI()
-    updatedMenu:removeSelf()
-   
-    updatedMenu = display.newGroup()
-    
-    local lifeBar = gui.newHorizontalSlider({display.contentCenterX, 0}, {display.contentCenterX, 30}, 
-            "gfx/slider_background.jpg", "gfx/slider_fill.jpg", character.life, globalParams.maxLife)
-    updatedMenu:insert(lifeBar)
+    local pointsText = gui.newSimpleText({10, 40}, 25, "Pts: " .. globalParams.points)
+    updatedMenu:insert(pointsText)
+    local pointsText = gui.newSimpleText({10, 60}, 25, "Dist: " .. globalParams.distance)
+    updatedMenu:insert(pointsText)
     
     screenGroup:insert(updatedMenu)
 end
@@ -117,7 +170,7 @@ end
 
 ------------
 function scene:enterScene( event )
-    
+
 end
 
 ------------
@@ -142,6 +195,8 @@ scene:addEventListener( "enterScene", scene )
 scene:addEventListener( "exitScene", scene )
 scene:addEventListener( "destroyScene", scene )
 scene:addEventListener( "didExitScene", scene )
-Runtime:addEventListener( "enterFrame", enterScene )
+Runtime:addEventListener( "enterFrame", onEnterScene )
+Runtime:addEventListener( "collision", onCollision )
+Runtime:addEventListener("touch", onUpTouch)
 
 return scene
