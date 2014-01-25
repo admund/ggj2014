@@ -22,7 +22,14 @@ function class.getRandomObstacle()
         class.getRandomPos(obstacle)
         physics.addBody(obstacle, "kinematic", {filter={ categoryBits = 4, maskBits = 8 }})
         
-        transition.to(obstacle, {time=globalParams.verticalSpeed*3, y=obstacle.y + 480*3})
+        function obstacle.destroy()
+            if obstacle then 
+                obstacle:removeSelf()
+            end
+        end
+        
+        transition.to(obstacle, {time=globalParams.verticalSpeed*3, y=obstacle.y + 480*3, onComplet=obstacle.destroy})
+        
         return obstacle
     end
 end

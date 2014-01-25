@@ -61,12 +61,12 @@ function class.newHorizontalSliderIndicator(pos, size, backgroundName, indicator
     return T
 end
 
-function class.newSimpleText(pos, size, text)
+function class.newSimpleText(pos, size, text, anchorX, anchorY)
     local T = display.newGroup()
     
     local text = display.newText(text, pos[1], pos[2], native.systemFont, size)
-    text.anchorX = 0
-    text.anchorY = 0
+    text.anchorX = anchorX or 0
+    text.anchorY = anchorY or 0
     
     T:insert(text)
     

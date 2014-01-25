@@ -1,26 +1,29 @@
 local storyboard = require( "storyboard" )
-local globalParams = require("src.data.dataGlobalParams")
 local gui = require("src.ui.uiItems")
+local globalParams = require("src.data.dataGlobalParams")
 
 local scene = storyboard.newScene()
 local screenGroup
 
 scene.customData = {}
-scene.onListener = nil
+scene.onRestart = nil
 
 ---------------------------------------------------
 --   LOCALS
 ---------------------------------------------------
 
 ---------- KILL THE POPUP
-local function onLeftClick( event )
-    --storyboard.hideOverlay( true, "zoomOutInFade", 250 )
-    storyboard.gotoScene("src.scene.sceneGame", "fromTop", 250)
+local function onRestartClick( event )
+    if(scene.onRestart) then
+        scene.onRestart()
+    end
+    storyboard.hideOverlay(true, "zoomOutInFade", 250)
+    --storyboard.gotoScene("src.scene.sceneGame", "fromTop", 250)
 end
 
-local function onRightClick( event )
+local function onMainMenuClick( event )
     --storyboard.hideOverlay( true, "zoomOutInFade", 250 )
-    storyboard.gotoScene("src.scene.sceneGame", "fromTop", 250)
+    --storyboard.gotoScene("src.scene.sceneGame", "fromTop", 250)
 end
 
 ---------------------------------------------------
@@ -37,16 +40,15 @@ function scene:createScene( event )
     local back = gui.newImageRect("gfx/back.jpg", {display.contentCenterX, display.contentCenterY}, {display.contentWidth-50, display.contentHeight-50})
     screenGroup:insert(back)
     
-    local fontSize = 12
-    local leftButton = gui.newSimpleTextButton({display.contentWidth/4, display.contentHeight/2}, {100, 100},
-            "Want to \ndistribute Candy", fontSize, onLeftClick)
+    local fontSize = 20
+    local leftButton = gui.newSimpleTextButton({display.contentCenterX, display.contentHeight/2}, {250, 100},
+            "Play Again!!!111ONE", fontSize, onRestartClick)
     screenGroup:insert(leftButton)
     
-    local rightButton = gui.newSimpleTextButton({display.contentWidth*3/4, display.contentHeight/2}, {100, 100},
-            "Want to \ndistribute \"Candy\" :>", fontSize, onRightClick)
+    local rightButton = gui.newSimpleTextButton({display.contentCenterX, display.contentHeight*3/4}, {250, 100},
+            "Back to Main Menu", fontSize, onMainMenuClick)
     screenGroup:insert(rightButton)
 end
-
 
 ------------
 function scene:willEnterScene( event )
@@ -55,7 +57,11 @@ end
 
 ------------
 function scene:enterScene( event )
-    
+    local text = "You earn " .. globalParams.points .. "$\n"
+        .. " And travel " .. globalParams.distance .. "m\n"
+        .. " Play Again - improve result!!!"
+    local resultText = gui.newSimpleText({display.contentCenterX, display.contentHeight/4}, 20, text, 0.5, 0.5)
+    screenGroup:insert(resultText)
 end
 
 ------------
@@ -82,3 +88,5 @@ scene:addEventListener( "destroyScene", scene )
 scene:addEventListener( "didExitScene", scene )
 
 return scene
+
+

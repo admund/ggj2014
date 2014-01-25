@@ -16,16 +16,18 @@ physics.start()
 physics.setGravity(0, 0)
 
 local logicCollisions = require("src.logic.logicCollisions")
+local logicGame = require("src.logic.logicGame")
 
 local scene = storyboard.newScene()
 local screenGroup
 
 scene.data = {}
 
-local character = require("src.unit.unitCharacter")
+local characterFactory = require("src.unit.unitCharacterFactory")
 local updatedMenu = nil
 
 -- timers
+local roadTimer = nil
 local candymanTimers = nil
 local obstacleTimers = nil
 
@@ -34,9 +36,9 @@ local obstacleTimers = nil
 ---------------------------------------------------
 local function onLeftClick( event )
     if(event.phase == "began") then
-        character:setMove(-1)
+        scene.character:setMove(-1)
     elseif(event.phase == "ended" or event.phase == "cancelled") then
-        character:setMove(0)
+        scene.character:setMove(0)
     end
     
     --character:moveLeft()
@@ -44,26 +46,49 @@ end
 
 local function onRightClick( event )
     if(event.phase == "began") then
-        character:setMove(1)
+        scene.character:setMove(1)
     elseif(event.phase == "ended" or event.phase == "cancelled") then
-        character:setMove(0)
+        scene.character:setMove(0)
     end
     
     --character:moveRight()
 end
 
 local function onThrowLeftClick( event )
-    character:throw(-1, screenGroup)
+    scene.character:throw(-1, screenGroup)
 end
 
 local function onThrowRightClick( event )
-    character:throw(1, screenGroup)
+    scene.character:throw(1, screenGroup)
 end
 
-local function onEnterScene( event )
+local function onLoose()
+    --timer.cancel(roadTimer);
+    print("onLoose")
+    timer.cancel(candymanTimers);
+    timer.cancel(obstacleTimers);
+    
+    globalParams.verticalSpeed = 0
+    
+    screenGroup:removeSelf()
+    
+    scene:createGame()
+    scene:updateUI()
+end
+
+local function onRestart()
+    print("onRestart")
+    globalParams.reset()
+    
+    scene:createTimers()
+end
+
+local function onEnterFrame( event )
     scene:updateUI()
     globalParams.updateSkillTime(event.time)
-    character:move(event.time)
+    scene.character:move(event.time)
+    logicGame.checkLooseCondition(onLoose, onRestart)
+    logicGame.nextLevel()
 end
 
 local function onCollision(event)
@@ -72,7 +97,7 @@ end
 
 local function onUpTouch(event)
     if(event.phase == "ended" or event.phase == "cancelled") then
-        character:setMove(0)
+        scene.character:setMove(0)
     end
 end
 
@@ -83,6 +108,17 @@ end
 -----------------------
 function scene:createScene( event )
 
+-- game
+    scene:createGame()
+    
+-- GUI
+    scene:updateUI()
+
+-- timers
+    scene:createTimers()
+end
+
+function scene:createGame()
     -- scene group
     screenGroup = display.newGroup()
     
@@ -95,22 +131,16 @@ function scene:createScene( event )
     screenGroup:insert(road2)
     
 -- PLAYER
-    screenGroup:insert(character)
-    
--- GUI
-    scene:updateUI()
-
--- timers
-    scene:createTimers()
+    scene.character = characterFactory.new()
+    screenGroup:insert(scene.character)
 end
 
 function scene:createTimers()
+    
     candymanTimers = timer.performWithDelay(globalParams.verticalSpeed, scene.createCandyman)
     
     obstacleTimers = timer.performWithDelay(globalParams.verticalSpeed/2, scene.createObstacle)
     
-    --print("physics.start")
-    --physics.start()
 end
 
 function scene.createCandyman()
@@ -248,7 +278,7 @@ scene:addEventListener( "enterScene", scene )
 scene:addEventListener( "exitScene", scene )
 scene:addEventListener( "destroyScene", scene )
 scene:addEventListener( "didExitScene", scene )
-Runtime:addEventListener( "enterFrame", onEnterScene )
+Runtime:addEventListener( "enterFrame", onEnterFrame )
 Runtime:addEventListener( "collision", onCollision )
 Runtime:addEventListener("touch", onUpTouch)
 

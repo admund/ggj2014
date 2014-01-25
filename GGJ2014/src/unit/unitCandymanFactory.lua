@@ -6,14 +6,25 @@ local class = {}
 
 function class.getRandomCandyman()
     local result = math.random()
-    if result > globalParams.getCandymanProbability() then
+    print(result .. " " .. globalParams.getCandymanProbability())
+    if result < globalParams.getCandymanProbability() then
         result = math.random()
         local Y = -240 - 240 * math.random()
+        local candyman = nil
         if result > 0.5 then
-            return class.createCandyman(-1, {15, Y})
+            candyman = class.createCandyman(-1, {15, Y})
         else
-            return class.createCandyman(1, {display.contentWidth - 15, Y})
+            candyman = class.createCandyman(1, {display.contentWidth - 15, Y})
         end
+        
+        function candyman.destroy()
+            if candyman then 
+                candyman:removeSelf()
+            end
+        end
+        
+        transition.to(candyman, {time=globalParams.verticalSpeed*3, y=candyman.y + 480*3, onComplet=candyman.destroy})
+        return candyman
     end
     
 end
@@ -21,26 +32,27 @@ end
 function class.createCandyman(direction, pos)
     local size = {30, 70}
     local candyman = nil
-    if globalParams.badMode then
+    
+    local result = math.random()
+    if result < 0.5 then
         if(direction == -1) then
             candyman = gui.newImageRect("gfx/candyman_1.jpg", pos, size)
         else
             candyman = gui.newImageRect("gfx/candyman_2.jpg", pos, size)
         end
+        candyman.isBad = true
     else
         if(direction == -1) then
             candyman = gui.newImageRect("gfx/grandma_1.jpg", pos, size)
         else
             candyman = gui.newImageRect("gfx/grandma_2.jpg", pos, size)
         end
+        candyman.isBad = false
     end
     candyman.name = "candyman"
     --print("candyman ") 
     --print(physics.addBody(candyman, "kinematic"))
     physics.addBody(candyman, "kinematic", {filter={ categoryBits = 2, maskBits = 1 }})
-    
-    transition.to(candyman, {time=globalParams.verticalSpeed * 2, y=pos[2]+480*2, 
-            onComplete = candyman.removeSelf})
     
     return candyman
 end

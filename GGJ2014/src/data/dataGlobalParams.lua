@@ -1,8 +1,5 @@
 local class = {}
 
-class.verticalSpeed = 2000--3000 -- czas w milisec potrzebny do pokanania calej mapy Vertical
-class.horizontalSpeed = 0.2 -- czas w milisec potrzebny do pokanania calej mapy Horizontal
-
 class.verticalStep = 10
 class.horizontalStep = display.contentWidth/8
 
@@ -10,10 +7,10 @@ class.throwSpeed = 450
 
 class.maxLife = 100
 
--- game
+-- move
+class.verticalSpeed = 3000 -- czas w milisec potrzebny do pokanania calej mapy Vertical
+class.horizontalSpeed = 0.2 -- czas w milisec potrzebny do pokanania calej mapy Horizontal
 class.distance = 0
-class.badLevel = 0.5 -- od 0 do 1
-class.badMode = false
 
 -- CA$H
 class.points = 0
@@ -29,7 +26,6 @@ class.steringModifTime = 0
 
 -- BAD MODE
 class.badLevel = 0.5 -- od 0 do 1
-class.badMode = false
 class.badForBad = -0.05
 class.badForGood = 0.02
 
@@ -59,6 +55,35 @@ function class.getObstacleProbability()
     else
         return class.obstacleProbability[class.currentLevel]
     end
+end
+
+function class.reset()
+    -- move
+    class.verticalSpeed = 2000
+    class.distance = 0
+
+    -- CA$H
+    class.points = 0
+    class.pointsForBad = 100
+    class.pointsForGood = 10
+
+    class.pointsModif = 1
+    class.pointsModifTime = 0
+
+    -- STERING
+    class.steringModifType = 0
+    class.steringModifTime = 0
+
+    -- BAD MODE
+    class.badLevel = 0.5 -- od 0 do 1
+
+    -- life
+    class.life = 100
+    class.dmgModif = 1
+    class.dmgModifTime = 0
+
+    -- level
+    class.currentLevel = 1
 end
 
 class.lastUpdateTime = 0

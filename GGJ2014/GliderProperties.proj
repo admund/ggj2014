@@ -6,6 +6,28 @@
       "corona" : {
         "panelStorage" : {
         }
+      },
+      "love2d" : {
+        "panelStorage" : {
+        }
+      },
+      "marmalade" : {
+        "panelStorage" : {
+          "MKB File Path" : {
+          }
+        }
+      },
+      "gideros" : {
+        "panelStorage" : {
+        }
+      },
+      "moai" : {
+        "panelStorage" : {
+        }
+      },
+      "lua" : {
+        "panelStorage" : {
+        }
       }
     },
     "autolibs" : [ ],

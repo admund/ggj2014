@@ -32,7 +32,7 @@ end
 function class.collisionDrugCandyman(drug, candyman)
     drug:destroy()
     
-    if globalParams.badMode then
+    if candyman.isBad then
         globalParams.points = globalParams.points + globalParams.pointsForBad*globalParams.pointsModif
         globalParams.badLevel = globalParams.badLevel + globalParams.badForBad
     else
@@ -69,13 +69,12 @@ end
 function class.collisionLifeObstacle(character, obstacle)
     class.tryRevertEffect(obstacle)
     
-    print("1 " .. globalParams.life .. " " .. obstacle.name .. " " ..globalParams.dmgModif )
     if(obstacle.name == "bad_life") then
         globalParams.life = globalParams.life - (globalParams.dmgModif * globalParams.simpleDmg)
+        character.hop()
     else
         globalParams.life = globalParams.life + globalParams.simpleDmg/2
     end
-    print("2 " .. globalParams.life)
     class.checkBoarderConditionLife()
 end
 
