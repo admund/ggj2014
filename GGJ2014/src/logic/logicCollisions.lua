@@ -9,8 +9,6 @@ local class = {}
 function class.collision(event)
     if ( event.phase == "began" ) then
         
-        --print( "began: " .. event.object1.name .. " and " .. event.object2.name )
-    
     -- candyman and drug
         if event.object1.name == "candyman" and event.object2.name == "drug" then
             class.collisionDrugCandyman(event.object2, event.object1)
@@ -64,6 +62,8 @@ function class.collisionCharacterObstacle(character, obstacle)
     elseif(obstacle.name == "bad_ster" or obstacle.name == "good_ster") then
         class.collisionSteringObstacle(character, obstacle)
     end
+    
+    character:toFront()
 end
 
 function class.collisionLifeObstacle(character, obstacle)
@@ -71,11 +71,14 @@ function class.collisionLifeObstacle(character, obstacle)
     
     if(obstacle.name == "bad_life") then
         globalParams.life = globalParams.life - (globalParams.dmgModif * globalParams.simpleDmg)
-        character.hop()
+        character.small()
     else
-        globalParams.life = globalParams.life + globalParams.simpleDmg/2
+        globalParams.life = globalParams.life + globalParams.simpleHeal
+        character.hop()
     end
     class.checkBoarderConditionLife()
+    
+    obstacle:removeSelf()
 end
 
 function class.checkBoarderConditionLife()
@@ -97,6 +100,7 @@ function class.collisionGoldObstacle(character, obstacle)
             globalParams.pointsModif = 0.5
             globalParams.pointsModifTime = globalParams.pointsModifTime + standardSkillTime
         end
+        character.small()
     else
         if(globalParams.pointsModif == 0.5) then
             globalParams.pointsModif = 2
@@ -105,6 +109,7 @@ function class.collisionGoldObstacle(character, obstacle)
             globalParams.pointsModif = 2
             globalParams.pointsModifTime = globalParams.pointsModifTime + standardSkillTime
         end
+        character.hop()
     end
     
     obstacle:removeSelf()
@@ -122,6 +127,7 @@ function class.collisionDefObstacle(character, obstacle)
             globalParams.dmgModif = 2
             globalParams.dmgModifTime = globalParams.dmgModifTime + standardSkillTime
         end
+        character.small()
     else
         if(globalParams.dmgModif == 2) then
             globalParams.dmgModif = 0.5
@@ -130,6 +136,7 @@ function class.collisionDefObstacle(character, obstacle)
             globalParams.dmgModif = 0.5
             globalParams.dmgModifTime = globalParams.dmgModifTime + standardSkillTime
         end
+        character.hop()
     end
     
     obstacle:removeSelf()
@@ -146,6 +153,7 @@ function class.collisionSteringObstacle(character, obstacle)
             globalParams.steringModifType = -1
             globalParams.steringModifTime = globalParams.steringModifTime + standardSkillTime
         end
+        character.small()
     else
         if(globalParams.steringModifType == -1) then
             globalParams.steringModifType = 1
@@ -154,6 +162,7 @@ function class.collisionSteringObstacle(character, obstacle)
             globalParams.steringModifType = 1
             globalParams.steringModifTime = globalParams.steringModifTime + standardSkillTime
         end
+        character.hop()
     end
 
     obstacle:removeSelf()
@@ -163,8 +172,6 @@ function class.tryRevertEffect(obstacle)
     if(obstacle.isBad == false and globalParams.badLevel < 0.5) then
         
         local rand = math.random()
-        print("bad " .. rand .. " " .. (0.5 - globalParams.badLevel/2))
-        
         if math.random() < (0.5 - globalParams.badLevel/2) then
             class.reverEffect(obstacle)
             gui.newFlotingText("You're BAD!!! REVERT :(", true)
@@ -172,8 +179,6 @@ function class.tryRevertEffect(obstacle)
     elseif(obstacle.isBad and globalParams.badLevel > 0.5) then
         
         local rand = math.random()
-        print("good " .. rand .. " " .. (globalParams.badLevel - 0.5)/2)
-        
         if math.random() < (globalParams.badLevel - 0.5)/2 then
             class.reverEffect(obstacle)
             gui.newFlotingText("You're GOOD!!! REVERT :)", false)

@@ -8,7 +8,7 @@ class.throwSpeed = 450
 class.maxLife = 100
 
 -- move
-class.verticalSpeed = 3000 -- czas w milisec potrzebny do pokanania calej mapy Vertical
+class.verticalSpeed = 2000 -- czas w milisec potrzebny do pokanania calej mapy Vertical
 class.horizontalSpeed = 0.2 -- czas w milisec potrzebny do pokanania calej mapy Horizontal
 class.distance = 0
 
@@ -33,7 +33,8 @@ class.badForGood = 0.02
 class.life = 100
 class.dmgModif = 1
 class.dmgModifTime = 0
-class.simpleDmg = 20
+class.simpleDmg = 30
+class.simpleHeal = 10
 
 -- level
 class.currentLevel = 1

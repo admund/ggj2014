@@ -6,7 +6,6 @@ local class = {}
 
 function class.getRandomCandyman()
     local result = math.random()
-    print(result .. " " .. globalParams.getCandymanProbability())
     if result < globalParams.getCandymanProbability() then
         result = math.random()
         local Y = -240 - 240 * math.random()
@@ -23,7 +22,7 @@ function class.getRandomCandyman()
             end
         end
         
-        transition.to(candyman, {time=globalParams.verticalSpeed*3, y=candyman.y + 480*3, onComplet=candyman.destroy})
+        --transition.to(candyman, {time=globalParams.verticalSpeed*3, y=candyman.y + 480*3, onComplet=candyman.destroy})
         return candyman
     end
     
@@ -50,8 +49,6 @@ function class.createCandyman(direction, pos)
         candyman.isBad = false
     end
     candyman.name = "candyman"
-    --print("candyman ") 
-    --print(physics.addBody(candyman, "kinematic"))
     physics.addBody(candyman, "kinematic", {filter={ categoryBits = 2, maskBits = 1 }})
     
     return candyman

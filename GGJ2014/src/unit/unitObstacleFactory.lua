@@ -17,7 +17,7 @@ class.badLifeObstacleList = {
 
 function class.getRandomObstacle()
     local result = math.random()
-    if result > globalParams.getObstacleProbability() then
+    --if result < globalParams.getObstacleProbability() then
         local obstacle = class.createObstacle()
         class.getRandomPos(obstacle)
         physics.addBody(obstacle, "kinematic", {filter={ categoryBits = 4, maskBits = 8 }})
@@ -27,22 +27,20 @@ function class.getRandomObstacle()
                 obstacle:removeSelf()
             end
         end
-        
-        transition.to(obstacle, {time=globalParams.verticalSpeed*3, y=obstacle.y + 480*3, onComplet=obstacle.destroy})
-        
+        --transition.to(obstacle, {time=globalParams.verticalSpeed*3, y=obstacle.y + 480*3, onComplet=obstacle.destroy})
         return obstacle
-    end
+    --end
 end
 
 function class.createObstacle()
     local result = math.random()
-    if(result < 0.4) then -- 0.4 zycie
+    if(result < 0.6) then -- 0.4 zycie
        return class.createLifeObstacle()
-    elseif(result < 0.6) then -- 0.2 punkty
+    elseif(result < 0.7) then -- 0.1 punkty
         return class.createGoldObstacle()
-    elseif(result < 0.8) then -- 0.2 obrona
+    elseif(result < 0.9) then -- 0.2 obrona
         return class.createDefenseObstacle()
-    else -- 0.2 sterowanie
+    else -- 0.1 sterowanie
         return class.createSteringObstacle()
    end
 end
@@ -60,7 +58,7 @@ function class.createLifeObstacle()
     local name = nil
     local isBad = false
     local result = math.random()
-    if(result < 0.4) then
+    if(result < 0.2) then
         tab = class.goodLifeObstacleList
         name = "good_life"
         isBad = false

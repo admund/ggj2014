@@ -9,7 +9,6 @@ local roadFactory = require("src.unit.unitRoadFactory")
 local candymanFactory = require("src.unit.unitCandymanFactory")
 local obstacleFactory = require("src.unit.unitObstacleFactory")
 
-print("physics.start")
 local physics = require( "physics" )
 --physics.setDrawMode( "hybrid" )
 physics.start()
@@ -22,6 +21,8 @@ local scene = storyboard.newScene()
 local screenGroup
 
 scene.data = {}
+scene.obstacleList = {}
+scene.looseState = false
 
 local characterFactory = require("src.unit.unitCharacterFactory")
 local updatedMenu = nil
@@ -63,36 +64,54 @@ local function onThrowRightClick( event )
 end
 
 local function onLoose()
-    --timer.cancel(roadTimer);
     print("onLoose")
+    
+    scene.looseState = true
+    
+    --timer.cancel(roadTimer);
     timer.cancel(candymanTimers);
     timer.cancel(obstacleTimers);
     
     globalParams.verticalSpeed = 0
+    scene.obstacleList = {}
     
     screenGroup:removeSelf()
+    screenGroup = display.newGroup()
+    scene.view:insert(screenGroup)
+    updatedMenu = nil
+    print("myk")
     
     scene:createGame()
     scene:updateUI()
 end
 
 local function onRestart()
-    print("onRestart")
+    scene.looseState = false
+    
     globalParams.reset()
     
     scene:createTimers()
 end
 
 local function onEnterFrame( event )
-    scene:updateUI()
-    globalParams.updateSkillTime(event.time)
-    scene.character:move(event.time)
-    logicGame.checkLooseCondition(onLoose, onRestart)
-    logicGame.nextLevel()
+    if(scene.looseState == false) then
+        scene:updateUI()
+
+        scene:moveRoad(event.time)
+
+        globalParams.updateSkillTime(event.time)
+        scene.character:move(event.time)
+        logicGame.checkLooseCondition(onLoose, onRestart)
+        logicGame.nextLevel()
+    end
 end
 
 local function onCollision(event)
     logicCollisions.collision(event)
+end
+
+local function onKeyEvent(event)
+    print(event.keyName)
 end
 
 local function onUpTouch(event)
@@ -107,28 +126,39 @@ end
 
 -----------------------
 function scene:createScene( event )
+    -- scene group
+    screenGroup = display.newGroup()
+    scene.view:insert(screenGroup)
+end
 
+------------
+function scene:enterScene( event )
+    globalParams.reset()
+    
 -- game
     scene:createGame()
     
 -- GUI
     scene:updateUI()
-
+    
 -- timers
     scene:createTimers()
+    
+    Runtime:addEventListener("enterFrame", onEnterFrame)
+    Runtime:addEventListener("collision", onCollision)
 end
 
 function scene:createGame()
-    -- scene group
-    screenGroup = display.newGroup()
-    
-    scene.view:insert(screenGroup)
     
 -- background
-    local road1 = roadFactory.createRoad({0, -480})
-    screenGroup:insert(road1)
-    local road2 = roadFactory.createRoad({0, 0})
-    screenGroup:insert(road2)
+    local road1, road2 = roadFactory.createRoad()
+    print("1 " .. road1.x .. " " .. road1.y )
+    print("2 " .. road2.x .. " " .. road2.y )
+   screenGroup:insert(road1)
+   screenGroup:insert(road2)
+   
+   scene.road1 = road1
+   scene.road2 = road2
     
 -- PLAYER
     scene.character = characterFactory.new()
@@ -147,6 +177,8 @@ function scene.createCandyman()
     local candyman = candymanFactory.getRandomCandyman()
     if candyman then
         screenGroup:insert(candyman)
+        
+        table.insert(scene.obstacleList, candyman)
     end
     candymanTimers = timer.performWithDelay(globalParams.verticalSpeed, scene.createCandyman)
 end
@@ -155,20 +187,53 @@ function scene.createObstacle()
     local obstacle = obstacleFactory.getRandomObstacle()
     if obstacle then
         screenGroup:insert(obstacle)
+        
+        table.insert(scene.obstacleList, obstacle)
     end
     obstacleTimers = timer.performWithDelay(globalParams.verticalSpeed/2, scene.createObstacle)
+end
+
+local lastRoadUpdateTime = 0
+function scene:moveRoad(updateTime)
+    if(lastRoadUpdateTime == 0) then
+        lastRoadUpdateTime = updateTime
+        return
+    end
+    
+    local deltaTime = updateTime - lastRoadUpdateTime
+    lastRoadUpdateTime = updateTime
+    local dist = globalParams.verticalSpeed * deltaTime/10000
+    
+    scene.road1.y = scene.road1.y + dist
+    if(scene.road1.y > 480) then
+        scene.road1.y = -960
+    end
+    
+    scene.road2.y = scene.road2.y + dist
+    if(scene.road2.y > 480) then
+        scene.road2.y = -960
+    end
+    
+    for i = 1, #scene.obstacleList do 
+        local tmp = scene.obstacleList[i]
+        if(tmp ~= nil and tmp.y ~= nil) then
+            tmp.y = tmp.y + dist
+            if(tmp.y > 480) then
+                table.remove(scene.obstacleList, i)
+                tmp:removeSelf()
+                i = i - 1
+            end
+        end
+    end
 end
 
 function scene:updateUI()
     if updatedMenu ~= nil then
         updatedMenu:removeSelf()
     end
-   
+   -- NEED TO UPDATE GUI
     updatedMenu = display.newGroup()
     updatedMenu:toFront()
-    
-    -- NEED TO UPDATE GUI
-    updatedMenu = display.newGroup()
     
     local buttonSize = {60, 60}
     -- gui
@@ -198,12 +263,12 @@ function scene:updateUI()
     updatedMenu:insert(lifeBar)
     
     local badLevelBar = gui.newHorizontalSliderIndicator({10, 10}, {display.contentCenterX-20, 30}, 
-        "gfx/slider_background.jpg", "gfx/indicator.jpg", globalParams.badLevel)
+        "gfx/bad_slider_back.png", "gfx/indicator.jpg", globalParams.badLevel)
     updatedMenu:insert(badLevelBar)
     
     local pointsText = gui.newSimpleText({10, 40}, 25, globalParams.points .. "$")
     updatedMenu:insert(pointsText)
-    local pointsText = gui.newSimpleText({10, 60}, 25, globalParams.distance .. "m")
+    local pointsText = gui.newSimpleText({10, 60}, 25, string.format("%.2f", globalParams.distance) .. "m")
     updatedMenu:insert(pointsText)
     
     local iconSize = 20
@@ -252,13 +317,10 @@ function scene:willEnterScene( event )
 end
 
 ------------
-function scene:enterScene( event )
-
-end
-
-------------
 function scene:exitScene( event )
-    
+    Runtime:addEventListener( "enterFrame", nil )
+    Runtime:addEventListener( "collision", nil )
+    Runtime:addEventListener( "key", nil );
 end
 
 ------------
@@ -278,8 +340,6 @@ scene:addEventListener( "enterScene", scene )
 scene:addEventListener( "exitScene", scene )
 scene:addEventListener( "destroyScene", scene )
 scene:addEventListener( "didExitScene", scene )
-Runtime:addEventListener( "enterFrame", onEnterFrame )
-Runtime:addEventListener( "collision", onCollision )
-Runtime:addEventListener("touch", onUpTouch)
+--Runtime:addEventListener("touch", onUpTouch)
 
 return scene

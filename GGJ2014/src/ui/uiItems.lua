@@ -73,6 +73,24 @@ function class.newSimpleText(pos, size, text, anchorX, anchorY)
     return T
 end
 
+function class.newSimpleTextWithBackground(pos, size, text, color, anchorX, anchorY)
+    local T = display.newGroup()
+    
+    local text = display.newText(text, pos[1], pos[2], native.systemFont, size)
+    text.anchorX = anchorX or 0
+    text.anchorY = anchorY or 0
+    
+    local back = display.newRect(pos[1], pos[2], text.contentWidth, text.contentHeight)
+    back.anchorX = anchorX or 0
+    back.anchorY = anchorY or 0
+    back.fill = color
+    
+    T:insert(back)
+    T:insert(text)
+    
+    return T
+end
+
 function class.newSimpleButton(pos, size, imgName, onTap, onTouch)
     local T = display.newGroup()
     --T.anchorChildren = true

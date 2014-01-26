@@ -9,7 +9,7 @@ local class = {}
 function class.new()
     local character = display.newGroup()
     -- wyswietlanie
-    local displayObject = gui.newImageRect("gfx/character.jpg", startPos, {40, 70})
+    local displayObject = gui.newImageRect("gfx/potato_char.png", startPos, {40, 70})
     displayObject.name = "character"
     physics.addBody(displayObject, "dynamic", {filter={ categoryBits = 8, maskBits = 4 }})
     displayObject.isSensor = true
@@ -17,9 +17,13 @@ function class.new()
     character.displayObject = displayObject
 
     function character.displayObject.hop()
-        print("hop")
-        transition.to(character.displayObject, {time=100, xScale = 1.2, yScale = 1.2})
-        transition.to(character.displayObject, {time=400, delay=100, xScale = 1, yScale = 1})
+        transition.to(character.displayObject, {time=100, xScale = character.displayObject.xScale*1.2, yScale = 1.2})
+        transition.to(character.displayObject, {time=400, delay=100, xScale = character.displayObject.xScale*1, yScale = 1})
+    end
+    
+    function character.displayObject.small()
+        transition.to(character.displayObject, {time=100, xScale = character.displayObject.xScale*0.8, yScale = 0.8})
+        transition.to(character.displayObject, {time=400, delay=100, xScale = character.displayObject.xScale*1, yScale = 1})
     end
 
     -- rzucanie
@@ -29,6 +33,7 @@ function class.new()
     character.canMove = true
     character.position = 0
     character.moveDirection = 0
+    character.seeDirection = -1
     character.lastMoveTime = 0
 
     -- functions
@@ -41,6 +46,10 @@ function class.new()
     end
 
     function character:setMove(direction)
+        if(character.seeDirection ~= direction and direction ~= 0) then
+            character.seeDirection = direction
+            character.displayObject:scale(-1, 1)
+        end
         character.moveDirection = direction
     end
 
