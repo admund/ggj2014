@@ -143,6 +143,7 @@ function scene:enterScene( event )
     
     Runtime:addEventListener("enterFrame", onEnterFrame)
     Runtime:addEventListener("collision", onCollision)
+    Runtime:addEventListener("key", onKeyEvent)
 end
 
 function scene:createGame()
@@ -271,9 +272,9 @@ function scene:updateGUI()
     local iconSize = 20
     local pointsGfx = nil
     if(globalParams.pointsModif == 2) then
-        pointsGfx = "gfx/good_$.jpg"
+        pointsGfx = "gfx/good_$.png"
     elseif(globalParams.pointsModif == 0.5) then
-        pointsGfx = "gfx/bad_$.jpg"
+        pointsGfx = "gfx/bad_$.png"
     else
         pointsGfx = "gfx/grey.png"
     end
@@ -283,9 +284,9 @@ function scene:updateGUI()
     
     local dmgGfx = nil
     if(globalParams.dmgModif == 0.5) then
-        dmgGfx = "gfx/good_def.jpg"
+        dmgGfx = "gfx/good_def.png"
     elseif(globalParams.dmgModif == 2) then
-        dmgGfx = "gfx/bad_def.jpg"
+        dmgGfx = "gfx/bad_def.png"
     else
         dmgGfx = "gfx/grey.png"
     end
@@ -295,9 +296,9 @@ function scene:updateGUI()
     
     local steringGfx = nil
     if(globalParams.steringModifType == 1) then
-        steringGfx = "gfx/good_ster.jpg"
+        steringGfx = "gfx/good_ster.png"
     elseif(globalParams.steringModifType == -1) then
-        steringGfx = "gfx/bad_ster.jpg"
+        steringGfx = "gfx/bad_ster.png"
     else
         steringGfx = "gfx/grey.png"
     end

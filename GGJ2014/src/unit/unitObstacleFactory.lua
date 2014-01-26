@@ -10,9 +10,9 @@ class.goodLifeObstacleList = {
 }
 
 class.badLifeObstacleList = {
-    {"gfx/bad_life_obst_1.jpg", 40, 40},
-    {"gfx/bad_life_obst_2.jpg", 60, 40},
-    {"gfx/bad_life_obst_3.jpg", 80, 40}
+    {"gfx/bad_life_obst_1.png", 40, 40},
+    {"gfx/bad_life_obst_2.png", 60, 40},
+    {"gfx/bad_life_obst_3.png", 80, 40}
 }
 
 function class.getRandomObstacle()
@@ -85,15 +85,15 @@ function class.createLifeObstacle()
 end
 
 function class.createGoldObstacle()
-    return class.createSimpleObstacle({"gfx/good_$.jpg", "good_$"}, {"gfx/bad_$.jpg", "bad_$"})
+    return class.createSimpleObstacle({"gfx/good_$.png", "good_$"}, {"gfx/bad_$.png", "bad_$"})
 end
 
 function class.createDefenseObstacle()
-    return class.createSimpleObstacle({"gfx/good_def.jpg", "good_def"}, {"gfx/bad_def.jpg", "bad_def"})
+    return class.createSimpleObstacle({"gfx/good_def.png", "good_def"}, {"gfx/bad_def.png", "bad_def"})
 end
 
 function class.createSteringObstacle()
-    return class.createSimpleObstacle({"gfx/good_ster.jpg", "good_ster"}, {"gfx/bad_ster.jpg", "bad_ster"})
+    return class.createSimpleObstacle({"gfx/good_ster.png", "good_ster"}, {"gfx/bad_ster.png", "bad_ster"})
 end
 
 function class.createSimpleObstacle(good, bad)
