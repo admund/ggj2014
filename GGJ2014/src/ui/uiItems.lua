@@ -57,7 +57,7 @@ function class.newHorizontalSliderIndicator(pos, size, backgroundName, indicator
     
     --local back = class.newImageRect(backgroundName, pos, size)
     local back = display.newRoundedRect(pos[1], pos[2], size[1], size[2], 6)
-    back.fill = {type="gradient", color1={255,0,0}, color2={0,255,0}, direction="up"}
+    back.fill = {type="gradient", color1={1,0,0}, color2={0,1,0}, direction="left"}
     --graphics.newGradient({255,0,0}, {0,255,0}, "up" )--{1,0,0}, {0,1,0}, "left" )
     back.anchorX = 0
     back.anchorY = 0

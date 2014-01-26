@@ -18,12 +18,14 @@ local function onRestartClick( event )
         scene.onRestart()
     end
     storyboard.hideOverlay(true, "zoomOutInFade", 250)
-    --storyboard.gotoScene("src.scene.sceneGame", "fromTop", 250)
 end
 
 local function onMainMenuClick( event )
-    --storyboard.hideOverlay( true, "zoomOutInFade", 250 )
-    --storyboard.gotoScene("src.scene.sceneGame", "fromTop", 250)
+    if(scene.onRestart) then
+        scene.onRestart()
+    end
+    storyboard.hideOverlay( true, "zoomOutInFade", 250 )
+    --storyboard.gotoScene("src.scene.sceneMainMenu", "fromTop", 250)
 end
 
 ---------------------------------------------------
