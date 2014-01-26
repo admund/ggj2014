@@ -92,9 +92,6 @@ function class.new()
 
         character.displayObject.x = dest-- - startPos[1]
         --transition.to( character, { time=1, x=dest})--, onComplete=character.realeseMove} )
-
-        -- add distance
-        globalParams.distance = globalParams.distance + globalParams.verticalSpeed * deltaTime/5000000
     end
 
     function character:throw(direction, screenGroup)

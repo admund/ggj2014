@@ -4,6 +4,7 @@
 local globalParams = require("src.data.dataGlobalParams")
 local storyboard = require( "storyboard" )
 local gui = require("src.ui.uiItems")
+local utilsAudio = require("src.utils.utilsAudio")
 
 local roadFactory = require("src.unit.unitRoadFactory")
 local candymanFactory = require("src.unit.unitCandymanFactory")
@@ -23,12 +24,12 @@ local screenGroup
 scene.data = {}
 scene.obstacleList = {}
 scene.looseState = false
+scene.lastRoadUpdateTime = 0
 
 local characterFactory = require("src.unit.unitCharacterFactory")
 local updatedMenu = nil
 
 -- timers
-local roadTimer = nil
 local candymanTimers = nil
 local obstacleTimers = nil
 
@@ -41,8 +42,6 @@ local function onLeftClick( event )
     elseif(event.phase == "ended" or event.phase == "cancelled") then
         scene.character:setMove(0)
     end
-    
-    --character:moveLeft()
 end
 
 local function onRightClick( event )
@@ -51,8 +50,6 @@ local function onRightClick( event )
     elseif(event.phase == "ended" or event.phase == "cancelled") then
         scene.character:setMove(0)
     end
-    
-    --character:moveRight()
 end
 
 local function onThrowLeftClick( event )
@@ -64,14 +61,15 @@ local function onThrowRightClick( event )
 end
 
 local function onLoose()
-    print("onLoose")
-    
     scene.looseState = true
+    
+    utilsAudio.playLoose()
     
     --timer.cancel(roadTimer);
     timer.cancel(candymanTimers);
     timer.cancel(obstacleTimers);
     
+    scene.lastRoadUpdateTime = 0
     globalParams.verticalSpeed = 0
     scene.obstacleList = {}
     
@@ -79,30 +77,29 @@ local function onLoose()
     screenGroup = display.newGroup()
     scene.view:insert(screenGroup)
     updatedMenu = nil
-    print("myk")
     
     scene:createGame()
-    scene:updateUI()
+    scene:updateGUI()
 end
 
 local function onRestart()
-    scene.looseState = false
-    
     globalParams.reset()
     
     scene:createTimers()
+    
+    scene.looseState = false
 end
 
 local function onEnterFrame( event )
     if(scene.looseState == false) then
-        scene:updateUI()
+        scene:updateGUI()
 
         scene:moveRoad(event.time)
 
         globalParams.updateSkillTime(event.time)
         scene.character:move(event.time)
-        logicGame.checkLooseCondition(onLoose, onRestart)
         logicGame.nextLevel()
+        logicGame.checkLooseCondition(onLoose, onRestart)
     end
 end
 
@@ -139,7 +136,7 @@ function scene:enterScene( event )
     scene:createGame()
     
 -- GUI
-    scene:updateUI()
+    scene:updateGUI()
     
 -- timers
     scene:createTimers()
@@ -152,8 +149,6 @@ function scene:createGame()
     
 -- background
     local road1, road2 = roadFactory.createRoad()
-    print("1 " .. road1.x .. " " .. road1.y )
-    print("2 " .. road2.x .. " " .. road2.y )
    screenGroup:insert(road1)
    screenGroup:insert(road2)
    
@@ -193,16 +188,18 @@ function scene.createObstacle()
     obstacleTimers = timer.performWithDelay(globalParams.verticalSpeed/2, scene.createObstacle)
 end
 
-local lastRoadUpdateTime = 0
 function scene:moveRoad(updateTime)
-    if(lastRoadUpdateTime == 0) then
-        lastRoadUpdateTime = updateTime
+    if(scene.lastRoadUpdateTime == 0) then
+        scene.lastRoadUpdateTime = updateTime
         return
     end
     
-    local deltaTime = updateTime - lastRoadUpdateTime
-    lastRoadUpdateTime = updateTime
+    local deltaTime = updateTime - scene.lastRoadUpdateTime
+    scene.lastRoadUpdateTime = updateTime
     local dist = globalParams.verticalSpeed * deltaTime/10000
+    
+     -- add distance
+    globalParams.distance = globalParams.distance + dist/500
     
     scene.road1.y = scene.road1.y + dist
     if(scene.road1.y > 480) then
@@ -227,7 +224,7 @@ function scene:moveRoad(updateTime)
     end
 end
 
-function scene:updateUI()
+function scene:updateGUI()
     if updatedMenu ~= nil then
         updatedMenu:removeSelf()
     end
@@ -239,22 +236,22 @@ function scene:updateUI()
     -- gui
     local guiAlpha = 0.7
     local leftButton = gui.newSimpleButton({buttonSize[1]/2, display.contentHeight-buttonSize[2]/2},
-        buttonSize, "gfx/arrow_left.jpg", nil, onLeftClick)
+        buttonSize, "gfx/arrow_left.png", nil, onLeftClick)
     leftButton.alpha = guiAlpha
     updatedMenu:insert(leftButton)
     
     local rightButton = gui.newSimpleButton({display.contentWidth-buttonSize[1]/2, display.contentHeight-buttonSize[2]/2},
-        buttonSize, "gfx/arrow_right.jpg", nil, onRightClick)
+        buttonSize, "gfx/arrow_right.png", nil, onRightClick)
     rightButton.alpha = guiAlpha
     updatedMenu:insert(rightButton)
     
     local throwLeftButton = gui.newSimpleButton({display.contentCenterX-buttonSize[1], display.contentHeight-buttonSize[2]/2},
-        buttonSize, "gfx/throw_button.jpg", onThrowLeftClick)
+        buttonSize, "gfx/throw_button.png", onThrowLeftClick)
     throwLeftButton.alpha = guiAlpha
     updatedMenu:insert(throwLeftButton)
     
     local throwRightButton = gui.newSimpleButton({display.contentCenterX+buttonSize[1], display.contentHeight-buttonSize[2]/2},
-        buttonSize, "gfx/throw_button.jpg", onThrowRightClick)
+        buttonSize, "gfx/throw_button.png", onThrowRightClick)
     throwRightButton.alpha = guiAlpha
     updatedMenu:insert(throwRightButton)
     
@@ -263,7 +260,7 @@ function scene:updateUI()
     updatedMenu:insert(lifeBar)
     
     local badLevelBar = gui.newHorizontalSliderIndicator({10, 10}, {display.contentCenterX-20, 30}, 
-        "gfx/bad_slider_back.png", "gfx/indicator.jpg", globalParams.badLevel)
+        "gfx/bad_slider_back.png", "gfx/skull.png", globalParams.badLevel)
     updatedMenu:insert(badLevelBar)
     
     local pointsText = gui.newSimpleText({10, 40}, 25, globalParams.points .. "$")
@@ -278,7 +275,7 @@ function scene:updateUI()
     elseif(globalParams.pointsModif == 0.5) then
         pointsGfx = "gfx/bad_$.jpg"
     else
-        pointsGfx = "gfx/back.jpg"
+        pointsGfx = "gfx/grey.png"
     end
     local goldModifIcon = gui.newImageRect(pointsGfx, 
         {display.contentWidth-iconSize, display.contentCenterY}, {iconSize, iconSize})
@@ -290,7 +287,7 @@ function scene:updateUI()
     elseif(globalParams.dmgModif == 2) then
         dmgGfx = "gfx/bad_def.jpg"
     else
-        dmgGfx = "gfx/back.jpg"
+        dmgGfx = "gfx/grey.png"
     end
     local dmgModifIcon = gui.newImageRect(dmgGfx, 
         {display.contentWidth-iconSize, display.contentCenterY + iconSize}, {iconSize, iconSize})
@@ -302,7 +299,7 @@ function scene:updateUI()
     elseif(globalParams.steringModifType == -1) then
         steringGfx = "gfx/bad_ster.jpg"
     else
-        steringGfx = "gfx/back.jpg"
+        steringGfx = "gfx/grey.png"
     end
     local steringModifIcon = gui.newImageRect(steringGfx, 
         {display.contentWidth-iconSize, display.contentCenterY+iconSize*2}, {iconSize, iconSize})

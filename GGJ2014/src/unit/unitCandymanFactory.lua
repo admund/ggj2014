@@ -35,16 +35,16 @@ function class.createCandyman(direction, pos)
     local result = math.random()
     if result < 0.5 then
         if(direction == -1) then
-            candyman = gui.newImageRect("gfx/candyman_1.jpg", pos, size)
+            candyman = gui.newImageRect("gfx/candyman_3.png", pos, size)
         else
-            candyman = gui.newImageRect("gfx/candyman_2.jpg", pos, size)
+            candyman = gui.newImageRect("gfx/candyman_4.png", pos, size)
         end
         candyman.isBad = true
     else
         if(direction == -1) then
-            candyman = gui.newImageRect("gfx/grandma_1.jpg", pos, size)
+            candyman = gui.newImageRect("gfx/grandma_1.png", pos, size)
         else
-            candyman = gui.newImageRect("gfx/grandma_2.jpg", pos, size)
+            candyman = gui.newImageRect("gfx/grandma_2.png", pos, size)
         end
         candyman.isBad = false
     end

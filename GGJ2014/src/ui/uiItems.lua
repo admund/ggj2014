@@ -20,12 +20,17 @@ end
 -- @return
 
 function class.newHorizontalSliderFill(pos, size, backgroundName, fullfilmentName, value, valueMax) 
-    local boarderSize = 4
+    local boarderSize = 0
     local T = display.newGroup()
     
-    local back = class.newImageRect(backgroundName, {pos[1] - boarderSize/2, pos[2] - boarderSize/2} , {size[1] + boarderSize, size[2] + boarderSize})
+    --local back = class.newImageRect(backgroundName, {pos[1] - boarderSize/2, pos[2] - boarderSize/2} , {size[1] + boarderSize, size[2] + boarderSize})
+    local back = display.newRoundedRect(pos[1] - boarderSize/2, pos[2] - boarderSize/2 , size[1] + boarderSize, size[2] + boarderSize, 6)
+    back.fill = {0.93, 0.87, 0.3}
     back.anchorX = 0
     back.anchorY = 0
+    back.stroke = {0, 0, 0}
+    back.strokeWidth = 3
+    
     T:insert(back)
     
     local width
@@ -37,7 +42,9 @@ function class.newHorizontalSliderFill(pos, size, backgroundName, fullfilmentNam
     else
         width = size[1]
     end
-    local fill = class.newImageRect(fullfilmentName, pos, {width, size[2]})
+    --local fill = class.newImageRect(fullfilmentName, pos, {width, size[2]})
+    local fill = display.newRect(pos[1], pos[2], width, size[2], 6)
+    fill.fill = {0.94, 0.2, 0.1}
     fill.anchorX = 0
     fill.anchorY = 0
     T:insert(fill)
@@ -48,9 +55,14 @@ end
 function class.newHorizontalSliderIndicator(pos, size, backgroundName, indicatorName, percent) 
     local T = display.newGroup()
     
-    local back = class.newImageRect(backgroundName, pos, size)
+    --local back = class.newImageRect(backgroundName, pos, size)
+    local back = display.newRoundedRect(pos[1], pos[2], size[1], size[2], 6)
+    back.fill = {type="gradient", color1={255,0,0}, color2={0,255,0}, direction="up"}
+    --graphics.newGradient({255,0,0}, {0,255,0}, "up" )--{1,0,0}, {0,1,0}, "left" )
     back.anchorX = 0
     back.anchorY = 0
+    back.stroke = {0, 0, 0}
+    back.strokeWidth = 3
     T:insert(back)
     
     local width = (size[1] - size[2]) * percent
@@ -64,11 +76,19 @@ end
 function class.newSimpleText(pos, size, text, anchorX, anchorY)
     local T = display.newGroup()
     
-    local text = display.newText(text, pos[1], pos[2], native.systemFont, size)
-    text.anchorX = anchorX or 0
-    text.anchorY = anchorY or 0
+    local text1 = display.newText(text, pos[1], pos[2], native.systemFont, size)
+    text1.anchorX = anchorX or 0
+    text1.anchorY = anchorY or 0
+    text1.align = "center"
     
-    T:insert(text)
+--    local text2 = display.newText(text, pos[1], pos[2], native.systemFont, size)
+--    text2.anchorX = anchorX or 0
+--    text2.anchorY = anchorY or 0
+--    text2.align = "center"
+--    text2.fill = {0,0,0}
+--    
+--    T:insert(text2)
+    T:insert(text1)
     
     return T
 end
@@ -115,7 +135,11 @@ function class.newSimpleTextButton(pos, size, text, fontSize, onTap)
     local T = display.newGroup()
     --T.anchorChildren = true
     
-    local btn = class.newImageRect("gfx/slider_background.jpg", pos, size)
+    --local btn = class.newImageRect("gfx/button_blue.png", pos, size)
+    local btn = display.newRoundedRect(pos[1], pos[2], size[1], size[2], 10)
+    btn.stroke = {0.0, 0.0, 0.0}
+    btn.strokeWidth = 5
+    btn.fill = {0.2, 0.3, 0.83}
     
     if(onTap ~= nil) then
         btn:addEventListener("tap", onTap)
@@ -124,7 +148,7 @@ function class.newSimpleTextButton(pos, size, text, fontSize, onTap)
     T:insert(btn)
     
     local textUi = display.newText(text, pos[1], pos[2], native.systemFont, fontSize)--20)
-    textUi.fill = {0.2,0.2,0.2}
+    textUi.fill = {0.0, 0.0, 0.0}
     T.text = textUi
     T:insert(textUi)
     

@@ -1,6 +1,6 @@
 local globalParams = require("src.data.dataGlobalParams")
 local gui = require("src.ui.uiItems")
-local audio = require("src.utils.utilsAudio")
+local utilsAudio = require("src.utils.utilsAudio")
 
 local standardSkillTime = 5000
 
@@ -33,14 +33,16 @@ function class.collisionDrugCandyman(drug, candyman)
     if candyman.isBad then
         globalParams.points = globalParams.points + globalParams.pointsForBad*globalParams.pointsModif
         globalParams.badLevel = globalParams.badLevel + globalParams.badForBad
+        
+        utilsAudio.playManThankYou()
     else
         globalParams.points = globalParams.points + globalParams.pointsForGood*globalParams.pointsModif
         globalParams.badLevel = globalParams.badLevel + globalParams.badForGood
+        
+        utilsAudio.playGrannyThankYou()
     end
     
     class.checkBoarderConditionBadLevel()
-
-    audio.playThankYou()
 end
 
 function class.checkBoarderConditionBadLevel()
@@ -72,9 +74,13 @@ function class.collisionLifeObstacle(character, obstacle)
     if(obstacle.name == "bad_life") then
         globalParams.life = globalParams.life - (globalParams.dmgModif * globalParams.simpleDmg)
         character.small()
+        
+        utilsAudio.playAuc()
     else
         globalParams.life = globalParams.life + globalParams.simpleHeal
         character.hop()
+        
+        utilsAudio.playGood()
     end
     class.checkBoarderConditionLife()
     
@@ -101,6 +107,7 @@ function class.collisionGoldObstacle(character, obstacle)
             globalParams.pointsModifTime = globalParams.pointsModifTime + standardSkillTime
         end
         character.small()
+        utilsAudio.playNoMoney()
     else
         if(globalParams.pointsModif == 0.5) then
             globalParams.pointsModif = 2
@@ -110,6 +117,7 @@ function class.collisionGoldObstacle(character, obstacle)
             globalParams.pointsModifTime = globalParams.pointsModifTime + standardSkillTime
         end
         character.hop()
+        utilsAudio.playMoney()
     end
     
     obstacle:removeSelf()
@@ -128,6 +136,7 @@ function class.collisionDefObstacle(character, obstacle)
             globalParams.dmgModifTime = globalParams.dmgModifTime + standardSkillTime
         end
         character.small()
+        utilsAudio.playWeak()
     else
         if(globalParams.dmgModif == 2) then
             globalParams.dmgModif = 0.5
@@ -137,6 +146,7 @@ function class.collisionDefObstacle(character, obstacle)
             globalParams.dmgModifTime = globalParams.dmgModifTime + standardSkillTime
         end
         character.hop()
+        utilsAudio.playIronman()
     end
     
     obstacle:removeSelf()
@@ -154,6 +164,7 @@ function class.collisionSteringObstacle(character, obstacle)
             globalParams.steringModifTime = globalParams.steringModifTime + standardSkillTime
         end
         character.small()
+        utilsAudio.playSlow()
     else
         if(globalParams.steringModifType == -1) then
             globalParams.steringModifType = 1
@@ -163,6 +174,7 @@ function class.collisionSteringObstacle(character, obstacle)
             globalParams.steringModifTime = globalParams.steringModifTime + standardSkillTime
         end
         character.hop()
+        utilsAudio.playSpeedUp()
     end
 
     obstacle:removeSelf()

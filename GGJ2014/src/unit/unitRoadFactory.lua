@@ -24,7 +24,6 @@ function class.createRoad()
     
 --    function road1:resetTransition()
 --        if(road1 ~= nil) then
---            --print("r1 " .. road1.x .. " " .. road1.y  )
 --            road1.y = road1.y - 6*240
 --            transition.to(road1, {time=globalParams.verticalSpeed*3, y=road1.y+6*240, onComplete = road1.resetTransition})
 --        end
@@ -37,7 +36,6 @@ function class.createRoad()
     
 --    function road2:resetTransition()
 --        if(self ~= nil) then
---            --print("r2 " .. self.x .. " " .. self.y  )
 --            self.y = self.y - 6*240
 --            transition.to(self, {time=globalParams.verticalSpeed*3, y=self.y+6*240, onComplete = road2.resetTransition})
 --        end

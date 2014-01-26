@@ -4,7 +4,7 @@ local physics = require( "physics" )
 local class = {}
 
 function class.createDrug(direction, pos)
-    local drug = gui.newImageRect("gfx/drug.jpg", pos, {30, 30})
+    local drug = gui.newImageRect("gfx/drug_1.png", pos, {30, 30})
     drug.name = "drug"
     physics.addBody(drug, "dynamic", {filter={ categoryBits = 1, maskBits = 2 }})
     

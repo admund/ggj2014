@@ -30,7 +30,7 @@ end
 
 local function onHideCredits( event )
     transition.to(scene.credits, {time=500, y=-500, onComplete=scene.credits.removeSelf})
-    scene.canShowCredits = false
+    scene.isShowCredits = false
 end
 
 ---------------------------------------------------
@@ -43,11 +43,12 @@ function scene.showCredits()
     local fontSize = 20
     local transTime = 1000
     local potatoSize = {60, 40}
+    local color = {0.95, 0.1, 0.3}
     
     local firstGroup = display.newGroup()
     local back = display.newRect(-400, 0, 320, 150)
     back.anchorX = 0; back.anchorY = 0;
-    back.fill = {0.3, 0.4, 0.8}
+    back.fill = color
     firstGroup:insert(back)
     local firsMR = gui.newImageRect("gfx/potato_mr.png", {-40, 70} , potatoSize)
     firstGroup:insert(firsMR)
@@ -58,7 +59,7 @@ function scene.showCredits()
     local secGroup = display.newGroup()
     local secBack = display.newRect(400, 150, 320, 100)
     secBack.anchorX = 0; secBack.anchorY = 0;
-    secBack.fill = {0.3, 0.4, 0.8}
+    secBack.fill = color
     secGroup:insert(secBack)
     local secMR = gui.newImageRect("gfx/potato_mr.png", {360, 200} , potatoSize)
     secMR:scale(-1, 1)
@@ -70,7 +71,7 @@ function scene.showCredits()
     local threeGroup = display.newGroup()
     local threeBack = display.newRect(-400, 250, 320, 100)
     threeBack.anchorX = 0; threeBack.anchorY = 0;
-    threeBack.fill = {0.3, 0.4, 0.8}
+    threeBack.fill = color
     threeGroup:insert(threeBack)
     local threeMR = gui.newImageRect("gfx/potato_mr.png", {-40, 330} , potatoSize)
     threeGroup:insert(threeMR)
@@ -81,19 +82,19 @@ function scene.showCredits()
     local fourGroup = display.newGroup()
     local secBack = display.newRect(400, 350, 320, 100)
     secBack.anchorX = 0; secBack.anchorY = 0;
-    secBack.fill = {0.3, 0.4, 0.8}
+    secBack.fill = color
     fourGroup:insert(secBack)
     local fourMR = gui.newImageRect("gfx/potato_mr.png", {360, 380} , potatoSize)
     fourMR:scale(-1, 1)
     fourGroup:insert(fourMR)
-    local musicText = gui.newSimpleTextWithBackground({420, 400}, fontSize, "Music & Sounds:\n     admund aka Closhard Alpha")--, {0.3, 0.4, 0.8})
+    local musicText = gui.newSimpleTextWithBackground({420, 380}, fontSize, "Music & Sounds:\n     admund aka Closhard Alpha")--, {0.3, 0.4, 0.8})
     fourGroup:insert(musicText)
     transition.to(fourGroup, {time=transTime, delay = transTime*3, x=-400})
 
     local fiveGroup = display.newGroup()
     local threeBack = display.newRect(-400, 450, 320, 100)
     threeBack.anchorX = 0; threeBack.anchorY = 0;
-    threeBack.fill = {0.3, 0.4, 0.8}
+    threeBack.fill = color
     fiveGroup:insert(threeBack)
     local fiveMR = gui.newImageRect("gfx/potato_mr.png", {-120, 460} , potatoSize)
     fiveMR:addEventListener("tap", onHideCredits)
@@ -117,7 +118,9 @@ function scene:createScene( event )
     screenGroup = display.newGroup()
     scene.view:insert(screenGroup)
     
-    local back = gui.newImageRect("gfx/back.jpg", {display.contentCenterX, display.contentCenterY}, {display.contentWidth, display.contentHeight})
+    --local back = gui.newImageRect("gfx/dialog_back.png", {display.contentCenterX, display.contentCenterY}, {display.contentWidth, display.contentHeight})
+    local back = display.newRect(display.contentCenterX, display.contentCenterY, display.contentWidth, display.contentHeight)
+    back.fill = {0.2, 0.78, 0.3}
     screenGroup:insert(back)
     
     local fontSize = 20

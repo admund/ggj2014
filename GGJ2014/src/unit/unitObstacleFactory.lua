@@ -4,9 +4,9 @@ local physics = require("physics")
 local class = {}
 
 class.goodLifeObstacleList = {
-    {"gfx/good_life_obst_1.jpg", 40, 40},
-    {"gfx/good_life_obst_2.jpg", 60, 40},
-    {"gfx/good_life_obst_3.jpg", 80, 40}
+    {"gfx/good_life_obst_1.png", 40, 40},
+    {"gfx/good_life_obst_1.png", 40, 40},
+    {"gfx/good_life_obst_1.png", 40, 40}
 }
 
 class.badLifeObstacleList = {

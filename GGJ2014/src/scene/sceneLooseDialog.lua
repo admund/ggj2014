@@ -37,7 +37,11 @@ function scene:createScene( event )
     screenGroup = display.newGroup()
     scene.view:insert(screenGroup)
     
-    local back = gui.newImageRect("gfx/back.jpg", {display.contentCenterX, display.contentCenterY}, {display.contentWidth-50, display.contentHeight-50})
+    --local back = gui.newImageRect("gfx/dialog_back.png", {display.contentCenterX, display.contentCenterY}, {display.contentWidth-50, display.contentHeight-50})
+    local back = display.newRoundedRect(display.contentCenterX, display.contentCenterY, display.contentWidth-50, display.contentHeight-50, 20)
+    back.fill = {0.2, 0.78, 0.3}
+    back.stroke = {0.0, 0.0, 0.0}
+    back.strokeWidth = 5
     screenGroup:insert(back)
     
     local fontSize = 20
@@ -57,9 +61,9 @@ end
 
 ------------
 function scene:enterScene( event )
-    local text = "You earn " .. globalParams.points .. "$\n"
-        .. " And travel " .. globalParams.distance .. "m\n"
-        .. " Play Again - improve result!!!"
+    local text = "     You earn " .. globalParams.points .. "$\n"
+        .. "    And travel " .. string.format("%.2f", globalParams.distance) .. "m\n"
+        .. "Play Again - improve result!!!"
     local resultText = gui.newSimpleText({display.contentCenterX, display.contentHeight/4}, 20, text, 0.5, 0.5)
     screenGroup:insert(resultText)
 end
