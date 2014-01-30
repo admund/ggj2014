@@ -8,6 +8,7 @@ function class.newImageRect(fileName, pos, size)
     local back = display.newImageRect(fileName, size[1], size[2])
     back.x = pos[1]
     back.y = pos[2]
+    
     return back
 end
 
@@ -49,6 +50,19 @@ function class.newHorizontalSliderFill(pos, size, backgroundName, fullfilmentNam
     fill.anchorY = 0
     T:insert(fill)
     
+    function T:updateIndicatorPos(value, valueMax)
+        local width
+        if(valueMax ~= -1) then
+            width = value/(valueMax + 1) * size[1] + 1
+            if(width > size[1]) then
+                width = size[1]
+            end
+        else
+            width = size[1]
+        end
+        fill.width = width
+    end
+    
     return T
 end
 
@@ -58,28 +72,33 @@ function class.newHorizontalSliderIndicator(pos, size, backgroundName, indicator
     --local back = class.newImageRect(backgroundName, pos, size)
     local back = display.newRoundedRect(pos[1], pos[2], size[1], size[2], 6)
     back.fill = {type="gradient", color1={1,0,0}, color2={0,1,0}, direction="left"}
-    --graphics.newGradient({255,0,0}, {0,255,0}, "up" )--{1,0,0}, {0,1,0}, "left" )
     back.anchorX = 0
     back.anchorY = 0
     back.stroke = {0, 0, 0}
     back.strokeWidth = 3
     T:insert(back)
     
-    local width = (size[1] - size[2]) * percent
+    local x = (size[1] - size[2]) * percent
     
-    local fill = class.newImageRect(indicatorName, {pos[1] + size[2]/2 + width, pos[2] + size[2]/2}, {size[2], size[2]})
-    T:insert(fill)
+    local indicator = class.newImageRect(indicatorName, {pos[1] + size[2]/2 + x, pos[2] + size[2]/2}, {size[2], size[2]})
+    T:insert(indicator)
+    
+    function T:updateIndicatorPos(percent)
+        local x = (size[1] - size[2]) * percent
+        indicator.x = pos[1] + size[2]/2 + x
+    end
     
     return T
 end
 
 function class.newSimpleText(pos, size, text, anchorX, anchorY)
-    local T = display.newGroup()
+    --local T = display.newGroup()
     
-    local text1 = display.newText(text, pos[1], pos[2], native.systemFont, size)
-    text1.anchorX = anchorX or 0
-    text1.anchorY = anchorY or 0
-    text1.align = "center"
+    --local text1 = 
+    local T = display.newText(text, pos[1], pos[2], native.systemFont, size)
+    T.anchorX = anchorX or 0
+    T.anchorY = anchorY or 0
+    T.align = "center"
     
 --    local text2 = display.newText(text, pos[1], pos[2], native.systemFont, size)
 --    text2.anchorX = anchorX or 0
@@ -88,7 +107,8 @@ function class.newSimpleText(pos, size, text, anchorX, anchorY)
 --    text2.fill = {0,0,0}
 --    
 --    T:insert(text2)
-    T:insert(text1)
+    --T:insert(text1)
+    
     
     return T
 end

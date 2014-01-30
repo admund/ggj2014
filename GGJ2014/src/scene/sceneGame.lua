@@ -73,10 +73,10 @@ local function onLoose()
     globalParams.verticalSpeed = 0
     scene.obstacleList = {}
     
-    screenGroup:removeSelf()
-    screenGroup = display.newGroup()
-    scene.view:insert(screenGroup)
-    updatedMenu = nil
+    --screenGroup:removeSelf()
+    --screenGroup = display.newGroup()
+    --scene.view:insert(screenGroup)
+    --updatedMenu = nil
     
     scene:createGame()
     scene:updateGUI()
@@ -136,7 +136,8 @@ function scene:enterScene( event )
     scene:createGame()
     
 -- GUI
-    scene:updateGUI()
+    scene:createGUI()
+    --scene:updateGUI()
     
 -- timers
     scene:createTimers()
@@ -212,12 +213,13 @@ function scene:moveRoad(updateTime)
         scene.road2.y = -960
     end
     
-    for i = 1, #scene.obstacleList do 
-        local tmp = scene.obstacleList[i]
+    local obstacleList = scene.obstacleList
+    for i = 1, #obstacleList do 
+        local tmp = obstacleList[i]
         if(tmp ~= nil and tmp.y ~= nil) then
             tmp.y = tmp.y + dist
             if(tmp.y > 480) then
-                table.remove(scene.obstacleList, i)
+                table.remove(obstacleList, i)
                 tmp:removeSelf()
                 i = i - 1
             end
@@ -225,13 +227,9 @@ function scene:moveRoad(updateTime)
     end
 end
 
-function scene:updateGUI()
-    if updatedMenu ~= nil then
-        updatedMenu:removeSelf()
-    end
-   -- NEED TO UPDATE GUI
+function scene:createGUI()
+--function scene:updateGUI()
     updatedMenu = display.newGroup()
-    updatedMenu:toFront()
     
     local buttonSize = {60, 60}
     -- gui
@@ -240,73 +238,123 @@ function scene:updateGUI()
         buttonSize, "gfx/arrow_left.png", nil, onLeftClick)
     leftButton.alpha = guiAlpha
     updatedMenu:insert(leftButton)
+    updatedMenu.leftButton = leftButton
     
     local rightButton = gui.newSimpleButton({display.contentWidth-buttonSize[1]/2, display.contentHeight-buttonSize[2]/2},
         buttonSize, "gfx/arrow_right.png", nil, onRightClick)
     rightButton.alpha = guiAlpha
     updatedMenu:insert(rightButton)
+    updatedMenu.rightButton = rightButton
     
     local throwLeftButton = gui.newSimpleButton({display.contentCenterX-buttonSize[1], display.contentHeight-buttonSize[2]/2},
         buttonSize, "gfx/throw_button.png", onThrowLeftClick)
     throwLeftButton.alpha = guiAlpha
     updatedMenu:insert(throwLeftButton)
+    updatedMenu.throwLeftButton = throwLeftButton
     
     local throwRightButton = gui.newSimpleButton({display.contentCenterX+buttonSize[1], display.contentHeight-buttonSize[2]/2},
         buttonSize, "gfx/throw_button.png", onThrowRightClick)
     throwRightButton.alpha = guiAlpha
     updatedMenu:insert(throwRightButton)
+    updatedMenu.throwRightButton = throwRightButton
     
     local lifeBar = gui.newHorizontalSliderFill({display.contentCenterX + 10, 10}, {display.contentCenterX-20, 30}, 
             "gfx/slider_background.jpg", "gfx/slider_fill.jpg", globalParams.life, globalParams.maxLife)
     updatedMenu:insert(lifeBar)
+    updatedMenu.lifeBar = lifeBar
     
     local badLevelBar = gui.newHorizontalSliderIndicator({10, 10}, {display.contentCenterX-20, 30}, 
         "gfx/bad_slider_back.png", "gfx/skull.png", globalParams.badLevel)
     updatedMenu:insert(badLevelBar)
+    updatedMenu.badLevelBar = badLevelBar
     
     local pointsText = gui.newSimpleText({10, 40}, 25, globalParams.points .. "$")
     updatedMenu:insert(pointsText)
-    local pointsText = gui.newSimpleText({10, 60}, 25, string.format("%.2f", globalParams.distance) .. "m")
-    updatedMenu:insert(pointsText)
+    updatedMenu.pointsText = pointsText
     
+    local distanceText = gui.newSimpleText({10, 60}, 25, string.format("%.2f", globalParams.distance) .. "m")
+    updatedMenu:insert(distanceText)
+    updatedMenu.distanceText = distanceText
+    
+    local sheetSettings = {
+     width = 40,
+     height = 40,
+     numFrames = 3
+    }
+    local sequences = {
+     { name="1", start=1, count=1, time= 80000},
+     { name="2", start=2, count=1, time= 80000},
+     { name="3", start=3, count=1, time= 80000}
+    }
     local iconSize = 20
-    local pointsGfx = nil
-    if(globalParams.pointsModif == 2) then
-        pointsGfx = "gfx/good_$.png"
-    elseif(globalParams.pointsModif == 0.5) then
-        pointsGfx = "gfx/bad_$.png"
-    else
-        pointsGfx = "gfx/grey.png"
-    end
-    local goldModifIcon = gui.newImageRect(pointsGfx, 
-        {display.contentWidth-iconSize, display.contentCenterY}, {iconSize, iconSize})
-    updatedMenu:insert(pointsText)
+    local scale = 0.5
+    local goldIconSheet = graphics.newImageSheet("gfx/sheet_$.png", sheetSettings)
+    local goldModifIcon = display.newSprite(goldIconSheet, sequences)
+    goldModifIcon.x = display.contentWidth-iconSize
+    goldModifIcon.y = display.contentCenterY
+    goldModifIcon:scale(scale, scale)
+    goldModifIcon:setSequence("3")
+    updatedMenu:insert(goldModifIcon)
+    updatedMenu.goldModifIcon = goldModifIcon
     
-    local dmgGfx = nil
-    if(globalParams.dmgModif == 0.5) then
-        dmgGfx = "gfx/good_def.png"
-    elseif(globalParams.dmgModif == 2) then
-        dmgGfx = "gfx/bad_def.png"
-    else
-        dmgGfx = "gfx/grey.png"
-    end
-    local dmgModifIcon = gui.newImageRect(dmgGfx, 
-        {display.contentWidth-iconSize, display.contentCenterY + iconSize}, {iconSize, iconSize})
+    local dmgIconSheet = graphics.newImageSheet("gfx/sheet_def.png", sheetSettings)
+    local dmgModifIcon = display.newSprite(dmgIconSheet, sequences)
+    dmgModifIcon.x = display.contentWidth-iconSize
+    dmgModifIcon.y = display.contentCenterY + iconSize
+    dmgModifIcon:scale(scale, scale)
+    dmgModifIcon:setSequence("3")
     updatedMenu:insert(dmgModifIcon)
+    updatedMenu.dmgModifIcon = dmgModifIcon
     
-    local steringGfx = nil
-    if(globalParams.steringModifType == 1) then
-        steringGfx = "gfx/good_ster.png"
-    elseif(globalParams.steringModifType == -1) then
-        steringGfx = "gfx/bad_ster.png"
-    else
-        steringGfx = "gfx/grey.png"
-    end
-    local steringModifIcon = gui.newImageRect(steringGfx, 
-        {display.contentWidth-iconSize, display.contentCenterY+iconSize*2}, {iconSize, iconSize})
+    local steringIconSheet = graphics.newImageSheet("gfx/sheet_ster.png", sheetSettings)
+    local steringModifIcon = display.newSprite(steringIconSheet, sequences)
+    steringModifIcon.x = display.contentWidth-iconSize
+    steringModifIcon.y = display.contentCenterY + 2*iconSize
+    steringModifIcon:scale(scale, scale)
+    steringModifIcon:setSequence("3")
     updatedMenu:insert(steringModifIcon)
+    updatedMenu.steringModifIcon = steringModifIcon
     
     screenGroup:insert(updatedMenu)
+end
+
+function scene:updateGUI()
+    --updatedMenu.lifeBar:updateIndicatorPos(globalParams.life, globalParams.maxLife)
+    --updatedMenu.badLevelBar:updateIndicatorPos(globalParams.badLevel)
+    
+    --updatedMenu.pointsText.text = globalParams.points .. "$"
+    --updatedMenu.distanceText.text = string.format("%.2fm", globalParams.distance)
+    
+    local frame = nil
+    local pts = globalParams.pointsModif
+    if(pts == 2) then
+        frame = "2"
+    elseif(pts == 0.5) then
+        frame = "1"
+    else
+        frame = "3"
+    end
+    updatedMenu.goldModifIcon:setSequence(frame)
+    
+    pts = globalParams.pointsModif
+    if(pts == 0.5) then
+        frame = "2"
+    elseif(pts == 2) then
+        frame = "1"
+    else
+        frame = "3"
+    end
+    updatedMenu.dmgModifIcon:setSequence(frame)
+    
+    pts = globalParams.pointsModif
+    if(pts == 1) then
+        frame = "2"
+    elseif(pts == -1) then
+        frame = "1"
+    else
+        frame = "3"
+    end
+    updatedMenu.steringModifIcon:setSequence(frame)
 end
 
 ------------
