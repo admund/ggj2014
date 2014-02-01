@@ -21,7 +21,8 @@ function class.getRandomCandyman()
                 candyman:removeSelf()
             end
         end
-        
+        candyman:setLinearVelocity(0, globalParams.physicVerticalSpeed)
+        --timer.performWithDelay(10000, candyman.destroy)
         --transition.to(candyman, {time=globalParams.verticalSpeed*3, y=candyman.y + 480*3, onComplet=candyman.destroy})
         return candyman
     end

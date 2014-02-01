@@ -8,6 +8,7 @@ class.throwSpeed = 450
 class.maxLife = 100
 
 -- move
+class.physicVerticalSpeed = 150
 class.verticalSpeed = 2000 -- czas w milisec potrzebny do pokanania calej mapy Vertical
 class.horizontalSpeed = 0.2 -- czas w milisec potrzebny do pokanania calej mapy Horizontal
 class.distance = 0
@@ -61,6 +62,7 @@ end
 function class.reset()
     -- move
     class.verticalSpeed = 2000
+    class.physicVerticalSpeed = 150
     class.distance = 0
 
     -- CA$H
@@ -87,10 +89,10 @@ function class.reset()
     class.currentLevel = 1
 end
 
-class.lastUpdateTime = 0
+local lastUpdateTime = 0
 function class.updateSkillTime(updateTime)
-    local deltaTime = updateTime - class.lastUpdateTime
-    class.lastUpdateTime = updateTime
+    local deltaTime = updateTime - lastUpdateTime
+    lastUpdateTime = updateTime
     
     if(class.pointsModifTime > 0) then
         class.pointsModifTime = class.pointsModifTime - deltaTime

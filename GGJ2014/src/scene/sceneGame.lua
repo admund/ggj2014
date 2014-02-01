@@ -11,7 +11,7 @@ local candymanFactory = require("src.unit.unitCandymanFactory")
 local obstacleFactory = require("src.unit.unitObstacleFactory")
 
 local physics = require( "physics" )
---physics.setDrawMode( "hybrid" )
+physics.setDrawMode( "hybrid" )
 physics.start()
 physics.setGravity(0, 0)
 
@@ -22,9 +22,13 @@ local scene = storyboard.newScene()
 local screenGroup
 
 scene.data = {}
-scene.obstacleList = {}
-scene.looseState = false
-scene.lastRoadUpdateTime = 0
+local obstacleList = {}
+local looseState = false
+local lastRoadUpdateTime = 0
+
+local character = nil
+--local road1 = nil
+--local road2 = nil
 
 local characterFactory = require("src.unit.unitCharacterFactory")
 local updatedMenu = nil
@@ -38,30 +42,30 @@ local obstacleTimers = nil
 ---------------------------------------------------
 local function onLeftClick( event )
     if(event.phase == "began") then
-        scene.character:setMove(-1)
+        character:setMove(-1)
     elseif(event.phase == "ended" or event.phase == "cancelled") then
-        scene.character:setMove(0)
+        character:setMove(0)
     end
 end
 
 local function onRightClick( event )
     if(event.phase == "began") then
-        scene.character:setMove(1)
+        character:setMove(1)
     elseif(event.phase == "ended" or event.phase == "cancelled") then
-        scene.character:setMove(0)
+        character:setMove(0)
     end
 end
 
 local function onThrowLeftClick( event )
-    scene.character:throw(-1, screenGroup)
+    character:throw(-1, screenGroup)
 end
 
 local function onThrowRightClick( event )
-    scene.character:throw(1, screenGroup)
+    character:throw(1, screenGroup)
 end
 
 local function onLoose()
-    scene.looseState = true
+    looseState = true
     
     utilsAudio.playLoose()
     
@@ -69,17 +73,18 @@ local function onLoose()
     timer.cancel(candymanTimers);
     timer.cancel(obstacleTimers);
     
-    scene.lastRoadUpdateTime = 0
+    lastRoadUpdateTime = 0
     globalParams.verticalSpeed = 0
-    scene.obstacleList = {}
+    obstacleList = {}
     
-    --screenGroup:removeSelf()
-    --screenGroup = display.newGroup()
-    --scene.view:insert(screenGroup)
+    screenGroup:removeSelf()
+    screenGroup = display.newGroup()
+    scene.view:insert(screenGroup)
     --updatedMenu = nil
     
     scene:createGame()
-    scene:updateGUI()
+    --scene:updateGUI()
+    scene:createGUI()
 end
 
 local function onRestart()
@@ -87,18 +92,18 @@ local function onRestart()
     
     scene:createTimers()
     
-    scene.looseState = false
+    looseState = false
 end
 
 local function onEnterFrame( event )
-    if(scene.looseState == false) then
+    if(looseState == false) then
         scene:updateGUI()
 
         scene:moveRoad(event.time)
 
         globalParams.updateSkillTime(event.time)
-        scene.character:move(event.time)
-        logicGame.nextLevel()
+        character:move(event.time)
+        logicGame.nextLevel(obstacleList)
         logicGame.checkLooseCondition(onLoose, onRestart)
     end
 end
@@ -113,7 +118,7 @@ end
 
 local function onUpTouch(event)
     if(event.phase == "ended" or event.phase == "cancelled") then
-        scene.character:setMove(0)
+        character:setMove(0)
     end
 end
 
@@ -150,24 +155,24 @@ end
 function scene:createGame()
     
 -- background
-    local road1, road2 = roadFactory.createRoad()
-   screenGroup:insert(road1)
+   --road1, road2 = roadFactory.createRoad()
+   --screenGroup:insert(road1)
+   local road2 = display.newImageRect("gfx/road2.jpg", 320, 480)
+   road2.anchorX = 0
+   road2.anchorY = 0
    screenGroup:insert(road2)
-   
-   scene.road1 = road1
-   scene.road2 = road2
     
 -- PLAYER
-    scene.character = characterFactory.new()
-    screenGroup:insert(scene.character)
+    character = characterFactory.new()
+    screenGroup:insert(character)
 end
 
 function scene:createTimers()
+    --candymanTimers = timer.performWithDelay(globalParams.verticalSpeed, scene.createCandyman)
+    --obstacleTimers = timer.performWithDelay(globalParams.verticalSpeed/2, scene.createObstacle)
     
-    candymanTimers = timer.performWithDelay(globalParams.verticalSpeed, scene.createCandyman)
-    
-    obstacleTimers = timer.performWithDelay(globalParams.verticalSpeed/2, scene.createObstacle)
-    
+    candymanTimers = timer.performWithDelay(1000, scene.createCandyman)
+    obstacleTimers = timer.performWithDelay(500, scene.createObstacle)
 end
 
 function scene.createCandyman()
@@ -175,7 +180,7 @@ function scene.createCandyman()
     if candyman then
         screenGroup:insert(candyman)
         
-        table.insert(scene.obstacleList, candyman)
+        table.insert(obstacleList, candyman)
     end
     candymanTimers = timer.performWithDelay(globalParams.verticalSpeed, scene.createCandyman)
 end
@@ -185,40 +190,40 @@ function scene.createObstacle()
     if obstacle then
         screenGroup:insert(obstacle)
         
-        table.insert(scene.obstacleList, obstacle)
+        table.insert(obstacleList, obstacle)
     end
     obstacleTimers = timer.performWithDelay(globalParams.verticalSpeed/2, scene.createObstacle)
 end
 
 function scene:moveRoad(updateTime)
-    if(scene.lastRoadUpdateTime == 0) then
-        scene.lastRoadUpdateTime = updateTime
+    if(lastRoadUpdateTime == 0) then
+        lastRoadUpdateTime = updateTime
         return
     end
     
-    local deltaTime = updateTime - scene.lastRoadUpdateTime
-    scene.lastRoadUpdateTime = updateTime
+    local deltaTime = updateTime - lastRoadUpdateTime
+    lastRoadUpdateTime = updateTime
     local dist = globalParams.verticalSpeed * deltaTime/10000
     
-     -- add distance
+    -- add distance
     globalParams.distance = globalParams.distance + dist/500
+--    
+--    road1.y = road1.y + dist
+--    if(road1.y > 480) then
+--        road1.y = -960
+--    end
+--    
+--    road2.y = road2.y + dist
+--    if(road2.y > 480) then
+--        road2.y = -960
+--    end
     
-    scene.road1.y = scene.road1.y + dist
-    if(scene.road1.y > 480) then
-        scene.road1.y = -960
-    end
-    
-    scene.road2.y = scene.road2.y + dist
-    if(scene.road2.y > 480) then
-        scene.road2.y = -960
-    end
-    
-    local obstacleList = scene.obstacleList
     for i = 1, #obstacleList do 
         local tmp = obstacleList[i]
         if(tmp ~= nil and tmp.y ~= nil) then
-            tmp.y = tmp.y + dist
-            if(tmp.y > 480) then
+            --tmp.y = tmp.y + dist
+            if(tmp.y > 520) then
+                --print("del " .. #obstacleList)
                 table.remove(obstacleList, i)
                 tmp:removeSelf()
                 i = i - 1
@@ -319,11 +324,11 @@ function scene:createGUI()
 end
 
 function scene:updateGUI()
-    --updatedMenu.lifeBar:updateIndicatorPos(globalParams.life, globalParams.maxLife)
-    --updatedMenu.badLevelBar:updateIndicatorPos(globalParams.badLevel)
+    updatedMenu.lifeBar:updateIndicatorPos(globalParams.life, globalParams.maxLife)
+    updatedMenu.badLevelBar:updateIndicatorPos(globalParams.badLevel)
     
-    --updatedMenu.pointsText.text = globalParams.points .. "$"
-    --updatedMenu.distanceText.text = string.format("%.2fm", globalParams.distance)
+    updatedMenu.pointsText.text = globalParams.points .. "$"
+    updatedMenu.distanceText.text = string.format("%.2fm", globalParams.distance)
     
     local frame = nil
     local pts = globalParams.pointsModif
@@ -336,7 +341,7 @@ function scene:updateGUI()
     end
     updatedMenu.goldModifIcon:setSequence(frame)
     
-    pts = globalParams.pointsModif
+    pts = globalParams.dmgModif
     if(pts == 0.5) then
         frame = "2"
     elseif(pts == 2) then
@@ -346,7 +351,7 @@ function scene:updateGUI()
     end
     updatedMenu.dmgModifIcon:setSequence(frame)
     
-    pts = globalParams.pointsModif
+    pts = globalParams.steringModifType
     if(pts == 1) then
         frame = "2"
     elseif(pts == -1) then
@@ -355,6 +360,7 @@ function scene:updateGUI()
         frame = "3"
     end
     updatedMenu.steringModifIcon:setSequence(frame)
+    updatedMenu:toFront()
 end
 
 ------------

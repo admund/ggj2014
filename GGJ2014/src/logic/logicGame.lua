@@ -14,13 +14,19 @@ function class.checkLooseCondition(onLoose, onRestart)
     end
 end
 
-function class.nextLevel()
+function class.nextLevel(obstacleList)
     if(globalParams.distance > 10*globalParams.currentLevel) then
         globalParams.currentLevel = globalParams.currentLevel + 1
         globalParams.verticalSpeed = globalParams.verticalSpeed + 500
---        if(globalParams.verticalSpeed == 0) then
---            globalParams.verticalSpeed = 500
---        end
+        
+        globalParams.physicVerticalSpeed = globalParams.physicVerticalSpeed + 50
+        
+        for i = 1, #obstacleList do 
+            local tmp = obstacleList[i]
+            if(tmp ~= nil and tmp.y ~= nil) then
+                tmp:setLinearVelocity(0, globalParams.physicVerticalSpeed)
+            end
+        end
     end
 end
 
