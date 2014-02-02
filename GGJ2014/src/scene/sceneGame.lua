@@ -11,7 +11,7 @@ local candymanFactory = require("src.unit.unitCandymanFactory")
 local obstacleFactory = require("src.unit.unitObstacleFactory")
 
 local physics = require( "physics" )
-physics.setDrawMode( "hybrid" )
+--physics.setDrawMode( "hybrid" )
 physics.start()
 physics.setGravity(0, 0)
 
